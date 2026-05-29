@@ -1,45 +1,120 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Centralized QA Data Platform</title>
+<title>Centralized QA Data Platform</title>
 
-    <style>
-        body { text-align: center; font-family: Arial; margin: 20px; }
-        input, select { padding: 5px; margin: 5px; }
-        button { padding: 6px 10px; margin: 5px; }
-        table { margin-top: 20px; border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ccc; padding: 8px; }
-        th { background: #f2f2f2; }
-    </style>
+<style>
+
+body {
+    font-family: Arial;
+    margin: 0;
+    background: #f5f7fa;
+}
+
+/* ✅ HEADER */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background: #ffffff;
+    border-bottom: 1px solid #ccc;
+}
+
+.title {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* ✅ TABS */
+.tabs {
+    display: flex;
+    background: #e0e4ea;
+    padding: 5px;
+}
+
+.tab {
+    padding: 10px 20px;
+    background: #cfd6df;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.tab.active {
+    background: white;
+    border-bottom: 3px solid #007bff;
+    font-weight: bold;
+}
+
+/* ✅ CONTENT */
+.content {
+    padding: 20px;
+}
+
+input, select {
+    padding: 5px;
+    margin: 5px;
+}
+
+button {
+    padding: 6px 10px;
+    margin: 5px;
+}
+
+table {
+    margin-top: 20px;
+    border-collapse: collapse;
+    width: 100%;
+    background: white;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+}
+
+th {
+    background: #f2f2f2;
+}
+
+.status {
+    padding: 10px;
+}
+
+</style>
 </head>
 
 <body>
 
-<h2>📊 Centralized QA Data Platform </h2>
+<!-- ✅ HEADER -->
+<div class="header">
+    <div class="title">Centralized QA Data Platform</div>
+
+    <div>
+        <label>Env:</label>
+        <select id="globalEnv" onchange="loadAll()">
+            <option>QA</option>
+            <option>UAT</option>
+            <option>PROD</option>
+        </select>
+    </div>
+</div>
 
 <!-- ✅ STATUS -->
-<p id="status"></p>
+<p id="status" class="status"></p>
 
-<!-- ✅ MODULE SWITCHER -->
-<select id="module" onchange="switchModule()">
-    <option value="testdata">Test Data</option>
-    <option value="enduser">EndUser</option>
-</select>
+<!-- ✅ MODULE TABS -->
+<div class="tabs">
+    <div class="tab active" onclick="switchModule('testdata', this)">Test Data</div>
+    <div class="tab" onclick="switchModule('enduser', this)">EndUser</div>
+</div>
 
-<hr>
+<!-- ✅ CONTENT -->
+<div class="content">
 
-<!-- ✅ SEARCH -->
 <h3>🔍 Search Data</h3>
 
-<input id="fieldName" placeholder="Field Name (optional)">
-
-<select id="env">
-    <option value="">Select Environment</option>
-    <option>QA</option>
-    <option>UAT</option>
-    <option>PROD</option>
-</select>
-
+<input id="fieldName" placeholder="Field Name / Value (optional)">
 <input id="country" placeholder="Country (optional)">
 
 <button onclick="searchData()">Search</button>
@@ -47,47 +122,44 @@
 
 <hr>
 
-<!-- ✅ ADMIN PENDING VIEW -->
 <h3>🛑 Pending Delete Requests (Admin)</h3>
 <button onclick="loadPending()">View Pending</button>
 
 <hr>
 
-<!-- ✅ TABLE -->
 <h3>📄 Data</h3>
+
 <table>
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Field</th>
-            <th>Value</th>
-            <th>Env</th>
-            <th>Country</th>
-            <th>Tag</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
+<thead>
+<tr></tr>
+</thead>
+<tbody id="tableBody"></tbody>
 </table>
+
+</div>
 
 <script>
 
-//const BASE_URL = "http://localhost:8080/testdata";
-// ✅ Dynamic module handling
+// ✅ MODULE
 let CURRENT_MODULE = "testdata";
 
-// ✅ Switch module and reload data
-function switchModule() {
-    CURRENT_MODULE = document.getElementById("module").value;
+// ✅ SWITCH MODULE (TABS)
+function switchModule(module, element) {
+
+    CURRENT_MODULE = module;
+
+    document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+    element.classList.add("active");
+
     loadAll();
 }
 
-// ✅ Get base URL for current module
+// ✅ BASE URL
 function getBaseUrl() {
     return `http://localhost:8080/${CURRENT_MODULE}`;
 }
 
-// ✅ STATUS HELPER
+// ✅ STATUS
 function setStatus(msg, isError = false) {
     const el = document.getElementById("status");
     el.innerText = msg;
@@ -96,26 +168,32 @@ function setStatus(msg, isError = false) {
 
 // ✅ LOAD ALL
 async function loadAll() {
+
     try {
-        setStatus("Loading all data...");
-        const res = await fetch(getBaseUrl());
+        setStatus("Loading...");
+
+        let env = document.getElementById("globalEnv").value;
+
+        const res = await fetch(getBaseUrl() + `/search?environment=${env}`);
         const data = await res.json();
+
         displayData(data);
+
         setStatus("Loaded successfully");
+
     } catch (err) {
         setStatus("Error loading data", true);
     }
 }
 
-// ✅ SEARCH WITH VALIDATION
+// ✅ SEARCH
 async function searchData() {
 
     let fieldName = document.getElementById("fieldName").value;
-    let env = document.getElementById("env").value;
     let country = document.getElementById("country").value;
+    let env = document.getElementById("globalEnv").value;
 
-    // ✅ Validation: at least 1 input required
-    if (!fieldName && !env && !country) {
+    if (!fieldName && !country) {
         setStatus("Please enter at least one filter", true);
         return;
     }
@@ -123,42 +201,41 @@ async function searchData() {
     try {
         setStatus("Searching...");
 
-        let url = getBaseUrl() + "/search?";
+        let url = getBaseUrl() + `/search?environment=${env}`;
 
-        if (fieldName) url += `fieldName=${fieldName}&`;
-        if (env) url += `environment=${env}&`;
-        if (country) url += `country=${country}`;
+        if (fieldName) url += `&fieldName=${fieldName}`;
+        if (country) url += `&country=${country}`;
 
         const res = await fetch(url);
         const data = await res.json();
 
         displayData(data);
 
-        setStatus("Search completed");
+        setStatus("Search complete");
 
     } catch (err) {
         setStatus("Search failed", true);
     }
 }
 
-// ✅ LOAD PENDING (ADMIN)
+// ✅ PENDING
 async function loadPending() {
     try {
-        setStatus("Loading pending deletes...");
+        setStatus("Loading pending...");
 
         const res = await fetch(getBaseUrl() + "/pending");
         const data = await res.json();
 
         displayData(data, true);
 
-        setStatus("Pending records loaded");
+        setStatus("Pending loaded");
 
     } catch (err) {
-        setStatus("Error loading pending data", true);
+        setStatus("Error loading pending", true);
     }
 }
 
-// ✅ DISPLAY DATA IN TABLE
+// ✅ DISPLAY DATA (UNCHANGED LOGIC)
 function displayData(data, isPending = false) {
 
     const tableHead = document.querySelector("thead tr");
@@ -167,31 +244,29 @@ function displayData(data, isPending = false) {
     tableHead.innerHTML = "";
     tableBody.innerHTML = "";
 
-    // ✅ Check current module
     if (CURRENT_MODULE === "enduser") {
 
-        // ✅ Define EndUser columns
         tableHead.innerHTML = `
-            <th>ID</th>
-            <th>EndUser Name</th>
-            <th>Env</th>
-            <th>Country</th>
-            <th>Address Line 1</th>
-            <th>Address Line 2</th>
-            <th>Address Line 3</th>
-            <th>City</th>
-            <th>State</th>
-            <th>Postal Code</th>
-            <th>Market Segment</th>
-            <th>Contact</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Tag</th>
-            <th>Action</th>
+        <th>ID</th>
+        <th>EndUser Name</th>
+        <th>Env</th>
+        <th>Country</th>
+        <th>Address Line 1</th>
+        <th>Address Line 2</th>
+        <th>Address Line 3</th>
+        <th>City</th>
+        <th>State</th>
+        <th>Postal Code</th>
+        <th>Market Segment</th>
+        <th>Contact</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Tag</th>
+        <th>Action</th>
         `;
 
         if (!data || data.length === 0) {
-            tableBody.innerHTML = "<tr><td colspan='15'>No Data Found</td></tr>";
+            tableBody.innerHTML = "<tr><td colspan='16'>No Data Found</td></tr>";
             return;
         }
 
@@ -213,7 +288,7 @@ function displayData(data, isPending = false) {
             row += `<td>${item.contactName || ""}</td>`;
             row += `<td>${item.email || ""}</td>`;
             row += `<td>${item.phoneNumber || ""}</td>`;
-            row += `<td>${item.tag || ""}</td>`
+            row += `<td>${item.tag || ""}</td>`;
 
             if (isPending) {
                 row += `<td><button onclick="approveDelete(${item.id})">Approve</button></td>`;
@@ -228,15 +303,14 @@ function displayData(data, isPending = false) {
 
     } else {
 
-        // ✅ Default TestData table
         tableHead.innerHTML = `
-            <th>ID</th>
-            <th>Field</th>
-            <th>Value</th>
-            <th>Environment</th>
-            <th>Country</th>
-            <th>Tag</th>
-            <th>Action</th>
+        <th>ID</th>
+        <th>Field</th>
+        <th>Value</th>
+        <th>Environment</th>
+        <th>Country</th>
+        <th>Tag</th>
+        <th>Action</th>
         `;
 
         if (!data || data.length === 0) {
@@ -268,21 +342,21 @@ function displayData(data, isPending = false) {
     }
 }
 
-// ✅ REQUEST DELETE
+// ✅ DELETE
 async function requestDelete(id) {
     await fetch(`${getBaseUrl()}/${id}`, { method: "DELETE" });
     setStatus("Delete requested");
     loadAll();
 }
 
-// ✅ ADMIN APPROVE DELETE
+// ✅ APPROVE DELETE
 async function approveDelete(id) {
     await fetch(`${getBaseUrl()}/admin/${id}`, { method: "DELETE" });
-    setStatus("Record deleted");
+    setStatus("Deleted");
     loadPending();
 }
 
-// ✅ INITIAL LOAD
+// ✅ INIT
 loadAll();
 
 </script>
