@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Centralized QA Data Platform</title>
+
+    <style>
+        body { text-align: center; font-family: Arial; margin: 20px; }
+        input, select { padding: 5px; margin: 5px; }
+        button { padding: 6px 10px; margin: 5px; }
+        table { margin-top: 20px; border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 8px; }
+        th { background: #f2f2f2; }
+    </style>
+</head>
+
+<body>
+
+<h2>📊 Centralized QA Data Platform </h2>
+
+<!-- ✅ STATUS -->
+<p id="status"></p>
+
+<!-- ✅ MODULE SWITCHER -->
+<select id="module" onchange="switchModule()">
+    <option value="testdata">Test Data</option>
+    <option value="enduser">EndUser</option>
+</select>
+
+<hr>
+
+<!-- ✅ SEARCH -->
+<h3>🔍 Search Data</h3>
+
+<input id="fieldName" placeholder="Field Name (optional)">
+
+<select id="env">
+    <option value="">Select Environment</option>
+    <option>QA</option>
+    <option>UAT</option>
+    <option>PROD</option>
+</select>
+
+<input id="country" placeholder="Country (optional)">
+
+<button onclick="searchData()">Search</button>
+<button onclick="loadAll()">Load All</button>
+
+<hr>
+
+<!-- ✅ ADMIN PENDING VIEW -->
+<h3>🛑 Pending Delete Requests (Admin)</h3>
+<button onclick="loadPending()">View Pending</button>
+
+<hr>
+
+<!-- ✅ TABLE -->
+<h3>📄 Data</h3>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Field</th>
+            <th>Value</th>
+            <th>Env</th>
+            <th>Country</th>
+            <th>Tag</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+</table>
+
+<script>
+
+//const BASE_URL = "http://localhost:8080/testdata";
+// ✅ Dynamic module handling
+let CURRENT_MODULE = "testdata";
+
+// ✅ Switch module and reload data
+function switchModule() {
+    CURRENT_MODULE = document.getElementById("module").value;
+    loadAll();
+}
+
+// ✅ Get base URL for current module
+function getBaseUrl() {
+    return `http://localhost:8080/${CURRENT_MODULE}`;
+}
+
+// ✅ STATUS HELPER
+function setStatus(msg, isError = false) {
+    const el = document.getElementById("status");
+    el.innerText = msg;
+    el.style.color = isError ? "red" : "green";
+}
+
+// ✅ LOAD ALL
+async function loadAll() {
+    try {
+        setStatus("Loading all data...");
+        const res = await fetch(getBaseUrl());
+        const data = await res.json();
+        displayData(data);
+        setStatus("Loaded successfully");
+    } catch (err) {
+        setStatus("Error loading data", true);
+    }
+}
+
+// ✅ SEARCH WITH VALIDATION
+async function searchData() {
+
+    let fieldName = document.getElementById("fieldName").value;
+    let env = document.getElementById("env").value;
+    let country = document.getElementById("country").value;
+
+    // ✅ Validation: at least 1 input required
+    if (!fieldName && !env && !country) {
+        setStatus("Please enter at least one filter", true);
+        return;
+    }
+
+    try {
+        setStatus("Searching...");
+
+        let url = getBaseUrl() + "/search?";
+
+        if (fieldName) url += `fieldName=${fieldName}&`;
+        if (env) url += `environment=${env}&`;
+        if (country) url += `country=${country}`;
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        displayData(data);
+
+        setStatus("Search completed");
+
+    } catch (err) {
+        setStatus("Search failed", true);
+    }
+}
+
+// ✅ LOAD PENDING (ADMIN)
+async function loadPending() {
+    try {
+        setStatus("Loading pending deletes...");
+
+        const res = await fetch(getBaseUrl() + "/pending");
+        const data = await res.json();
+
+        displayData(data, true);
+
+        setStatus("Pending records loaded");
+
+    } catch (err) {
+        setStatus("Error loading pending data", true);
+    }
+}
+
+// ✅ DISPLAY DATA IN TABLE
+function displayData(data, isPending = false) {
+
+    const tableHead = document.querySelector("thead tr");
+    const tableBody = document.getElementById("tableBody");
+
+    tableHead.innerHTML = "";
+    tableBody.innerHTML = "";
+
+    // ✅ Check current module
+    if (CURRENT_MODULE === "enduser") {
+
+        // ✅ Define EndUser columns
+        tableHead.innerHTML = `
+            <th>ID</th>
+            <th>EndUser Name</th>
+            <th>Env</th>
+            <th>Country</th>
+            <th>Address Line 1</th>
+            <th>Address Line 2</th>
+            <th>Address Line 3</th>
+            <th>City</th>
+            <th>State</th>
+            <th>Postal Code</th>
+            <th>Market Segment</th>
+            <th>Contact</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Tag</th>
+            <th>Action</th>
+        `;
+
+        if (!data || data.length === 0) {
+            tableBody.innerHTML = "<tr><td colspan='15'>No Data Found</td></tr>";
+            return;
+        }
+
+        data.forEach(item => {
+
+            let row = "<tr>";
+
+            row += `<td>${item.id}</td>`;
+            row += `<td>${item.endUserName || ""}</td>`;
+            row += `<td>${item.environment || ""}</td>`;
+            row += `<td>${item.country || ""}</td>`;
+            row += `<td>${item.addressLine1 || ""}</td>`;
+            row += `<td>${item.addressLine2 || ""}</td>`;
+            row += `<td>${item.addressLine3 || ""}</td>`;
+            row += `<td>${item.city || ""}</td>`;
+            row += `<td>${item.state || ""}</td>`;
+            row += `<td>${item.postalCode || ""}</td>`;
+            row += `<td>${item.marketSegmentType || ""}</td>`;
+            row += `<td>${item.contactName || ""}</td>`;
+            row += `<td>${item.email || ""}</td>`;
+            row += `<td>${item.phoneNumber || ""}</td>`;
+            row += `<td>${item.tag || ""}</td>`
+
+            if (isPending) {
+                row += `<td><button onclick="approveDelete(${item.id})">Approve</button></td>`;
+            } else {
+                row += `<td><button onclick="requestDelete(${item.id})">Delete</button></td>`;
+            }
+
+            row += "</tr>";
+
+            tableBody.innerHTML += row;
+        });
+
+    } else {
+
+        // ✅ Default TestData table
+        tableHead.innerHTML = `
+            <th>ID</th>
+            <th>Field</th>
+            <th>Value</th>
+            <th>Environment</th>
+            <th>Country</th>
+            <th>Tag</th>
+            <th>Action</th>
+        `;
+
+        if (!data || data.length === 0) {
+            tableBody.innerHTML = "<tr><td colspan='7'>No Data Found</td></tr>";
+            return;
+        }
+
+        data.forEach(item => {
+
+            let row = "<tr>";
+
+            row += `<td>${item.id}</td>`;
+            row += `<td>${item.fieldName}</td>`;
+            row += `<td>${item.fieldValue}</td>`;
+            row += `<td>${item.environment}</td>`;
+            row += `<td>${item.country}</td>`;
+            row += `<td>${item.tag || ""}</td>`;
+
+            if (isPending) {
+                row += `<td><button onclick="approveDelete(${item.id})">Approve</button></td>`;
+            } else {
+                row += `<td><button onclick="requestDelete(${item.id})">Delete</button></td>`;
+            }
+
+            row += "</tr>";
+
+            tableBody.innerHTML += row;
+        });
+    }
+}
+
+// ✅ REQUEST DELETE
+async function requestDelete(id) {
+    await fetch(`${getBaseUrl()}/${id}`, { method: "DELETE" });
+    setStatus("Delete requested");
+    loadAll();
+}
+
+// ✅ ADMIN APPROVE DELETE
+async function approveDelete(id) {
+    await fetch(`${getBaseUrl()}/admin/${id}`, { method: "DELETE" });
+    setStatus("Record deleted");
+    loadPending();
+}
+
+// ✅ INITIAL LOAD
+loadAll();
+
+</script>
+
+</body>
+</html>
