@@ -1,252 +1,277 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<title>Centralized QA Data Platform</title>
+    <title>Centralized QA Data Platform</title>
 
-<style>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 0;
+            background: #f5f7fa;
+        }
 
-body {
-    font-family: Arial;
-    margin: 0;
-    background: #f5f7fa;
-}
+        /* ✅ HEADER */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: #ffffff;
+            border-bottom: 1px solid #ccc;
+        }
 
-/* ✅ HEADER */
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    background: #ffffff;
-    border-bottom: 1px solid #ccc;
-}
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+        }
 
-.title {
-    font-size: 20px;
-    font-weight: bold;
-}
+        /* ✅ TABS */
+        .tabs {
+            display: flex;
+            background: #e0e4ea;
+            padding: 5px;
+        }
 
-/* ✅ TABS */
-.tabs {
-    display: flex;
-    background: #e0e4ea;
-    padding: 5px;
-}
+        .tab {
+            padding: 10px 20px;
+            background: #cfd6df;
+            margin-right: 5px;
+            cursor: pointer;
+        }
 
-.tab {
-    padding: 10px 20px;
-    background: #cfd6df;
-    margin-right: 5px;
-    cursor: pointer;
-}
+        .tab.active {
+            background: white;
+            border-bottom: 3px solid #007bff;
+            font-weight: bold;
+        }
 
-.tab.active {
-    background: white;
-    border-bottom: 3px solid #007bff;
-    font-weight: bold;
-}
+        /* ✅ CONTENT */
+        .content {
+            padding: 20px;
+        }
 
-/* ✅ CONTENT */
-.content {
-    padding: 20px;
-}
+        input,
+        select {
+            padding: 5px;
+            margin: 5px;
+        }
 
-input, select {
-    padding: 5px;
-    margin: 5px;
-}
+        button {
+            padding: 6px 10px;
+            margin: 5px;
+        }
 
-button {
-    padding: 6px 10px;
-    margin: 5px;
-}
+        table {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 100%;
+            background: white;
+        }
 
-table {
-    margin-top: 20px;
-    border-collapse: collapse;
-    width: 100%;
-    background: white;
-}
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+        }
 
-th, td {
-    border: 1px solid #ccc;
-    padding: 8px;
-}
+        th {
+            background: #f2f2f2;
+        }
 
-th {
-    background: #f2f2f2;
-}
-
-.status {
-    padding: 10px;
-}
-
-</style>
+        .status {
+            padding: 10px;
+        }
+    </style>
 </head>
 
 <body>
 
-<!-- ✅ HEADER -->
-<div class="header">
-    <div class="title">Centralized QA Data Platform</div>
+    <!-- ✅ HEADER -->
+    <div class="header">
+        <div class="title">Centralized QA Data Platform</div>
 
-    <div>
-        <label>Env:</label>
-        <select id="globalEnv" onchange="loadAll()">
-            <option>QA</option>
-            <option>UAT</option>
-            <option>PROD</option>
-        </select>
+        <div>
+            <label>Env:</label>
+            <select id="globalEnv" onchange="loadAll()">
+                <option>QA</option>
+                <option>UAT</option>
+                <option>PROD</option>
+            </select>
+        </div>
     </div>
-</div>
 
-<!-- ✅ STATUS -->
-<p id="status" class="status"></p>
+    <!-- ✅ STATUS -->
+    <p id="status" class="status"></p>
 
-<!-- ✅ MODULE TABS -->
-<div class="tabs">
-    <div class="tab active" onclick="switchModule('testdata', this)">Test Data</div>
-    <div class="tab" onclick="switchModule('enduser', this)">EndUser</div>
-</div>
+    <!-- ✅ MODULE TABS -->
+    <div class="tabs">
+        <div class="tab active" onclick="switchModule('testdata', this)">Test Data</div>
+        <div class="tab" onclick="switchModule('enduser', this)">EndUser</div>
+    </div>
 
-<!-- ✅ CONTENT -->
-<div class="content">
+    <!-- ✅ CONTENT -->
+    <div class="content">
 
-<h3>🔍 Search Data</h3>
+        <h3>🔍 Search Data</h3>
 
-<input id="fieldName" placeholder="Field Name / Value (optional)">
-<input id="country" placeholder="Country (optional)">
+        <input id="fieldName" placeholder="Field Name / Value (optional)">
+        <input id="country" placeholder="Country (optional)">
 
-<button onclick="searchData()">Search</button>
-<button onclick="loadAll()">Load All</button>
+        <button onclick="searchData()">Search</button>
+        <button onclick="loadAll()">Load All</button>
 
-<hr>
+        <hr>
 
-<h3>🛑 Pending Delete Requests (Admin)</h3>
-<button onclick="loadPending()">View Pending</button>
+        <h3>🛑 Pending Delete Requests (Admin)</h3>
+        <button onclick="loadPending()">View Pending</button>
 
-<hr>
+        <hr>
 
-<h3>📄 Data</h3>
+        <h3>📄 Data</h3>
 
-<table>
-<thead>
-<tr></tr>
-</thead>
-<tbody id="tableBody"></tbody>
-</table>
+        <table>
+            <thead>
+                <tr></tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
 
-</div>
+    </div>
 
-<script>
+    <script>
 
-// ✅ MODULE
-let CURRENT_MODULE = "testdata";
+        // ✅ MODULE
+        let CURRENT_MODULE = "testdata";
 
-// ✅ SWITCH MODULE (TABS)
-function switchModule(module, element) {
+        // ✅ SWITCH MODULE (TABS)
+        function switchModule(module, element) {
 
-    CURRENT_MODULE = module;
+            CURRENT_MODULE = module;
 
-    document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
-    element.classList.add("active");
+            document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+            element.classList.add("active");
 
-    loadAll();
-}
+            loadAll();
+        }
 
-// ✅ BASE URL
-function getBaseUrl() {
-    return `http://localhost:8080/${CURRENT_MODULE}`;
-}
+        // ✅ BASE URL
+        function getBaseUrl() {
+            return `http://localhost:8080/${CURRENT_MODULE}`;
+        }
 
-// ✅ STATUS
-function setStatus(msg, isError = false) {
-    const el = document.getElementById("status");
-    el.innerText = msg;
-    el.style.color = isError ? "red" : "green";
-}
+        // ✅ STATUS
+        function setStatus(msg, isError = false) {
+            const el = document.getElementById("status");
+            el.innerText = msg;
+            el.style.color = isError ? "red" : "green";
+        }
 
-// ✅ LOAD ALL
-async function loadAll() {
+        // ✅ LOAD ALL
+        async function loadAll() {
 
-    try {
-        setStatus("Loading...");
+            try {
+                setStatus("Loading...");
 
-        let env = document.getElementById("globalEnv").value;
+                let env = document.getElementById("globalEnv").value;
 
-        const res = await fetch(getBaseUrl() + `/search?environment=${env}`);
-        const data = await res.json();
+                const res = await fetch(getBaseUrl() + `/search?environment=${env}`);
 
-        displayData(data);
+                // ✅ CHECK RESPONSE
+                if (!res.ok) {
+                    let error = await res.text();
+                    setStatus(error, true);
+                    return;
+                }
 
-        setStatus("Loaded successfully");
+                const data = await res.json();
 
-    } catch (err) {
-        setStatus("Error loading data", true);
-    }
-}
+                displayData(data);
 
-// ✅ SEARCH
-async function searchData() {
+                setStatus("Loaded successfully");
 
-    let fieldName = document.getElementById("fieldName").value;
-    let country = document.getElementById("country").value;
-    let env = document.getElementById("globalEnv").value;
+            } catch (err) {
+                setStatus("Error loading data", true);
+            }
+        }
 
-    if (!fieldName && !country) {
-        setStatus("Please enter at least one filter", true);
-        return;
-    }
+        // ✅ SEARCH
+        async function searchData() {
 
-    try {
-        setStatus("Searching...");
+            let fieldName = document.getElementById("fieldName").value;
+            let country = document.getElementById("country").value;
+            let env = document.getElementById("globalEnv").value;
 
-        let url = getBaseUrl() + `/search?environment=${env}`;
+            if (!fieldName && !country) {
+                setStatus("Please enter at least one filter", true);
+                return;
+            }
 
-        if (fieldName) url += `&fieldName=${fieldName}`;
-        if (country) url += `&country=${country}`;
+            try {
+                setStatus("Searching...");
 
-        const res = await fetch(url);
-        const data = await res.json();
+                let url = getBaseUrl() + `/search?environment=${env}`;
 
-        displayData(data);
+                if (fieldName) url += `&fieldName=${fieldName}`;
+                if (country) url += `&country=${country}`;
 
-        setStatus("Search complete");
+                const res = await fetch(url);
 
-    } catch (err) {
-        setStatus("Search failed", true);
-    }
-}
+                // ✅ CHECK RESPONSE
+                if (!res.ok) {
+                    let error = await res.text();
+                    setStatus(error, true);
+                    return;
+                }
 
-// ✅ PENDING
-async function loadPending() {
-    try {
-        setStatus("Loading pending...");
+                const data = await res.json();
 
-        const res = await fetch(getBaseUrl() + "/pending");
-        const data = await res.json();
+                displayData(data);
 
-        displayData(data, true);
+                setStatus("Search complete");
 
-        setStatus("Pending loaded");
+            } catch (err) {
+                setStatus("Search failed", true);
+            }
+        }
 
-    } catch (err) {
-        setStatus("Error loading pending", true);
-    }
-}
+        // ✅ PENDING
+        async function loadPending() {
+            try {
+                setStatus("Loading pending...");
 
-// ✅ DISPLAY DATA (UNCHANGED LOGIC)
-function displayData(data, isPending = false) {
+                const res = await fetch(getBaseUrl() + "/pending");
 
-    const tableHead = document.querySelector("thead tr");
-    const tableBody = document.getElementById("tableBody");
+                // ✅ CHECK RESPONSE
+                if (!res.ok) {
+                    let error = await res.text();
+                    setStatus(error, true);
+                    return;
+                }
 
-    tableHead.innerHTML = "";
-    tableBody.innerHTML = "";
+                const data = await res.json();
 
-    if (CURRENT_MODULE === "enduser") {
+                displayData(data, true);
 
-        tableHead.innerHTML = `
+                setStatus("Pending loaded");
+
+            } catch (err) {
+                setStatus("Error loading pending", true);
+            }
+        }
+
+        // ✅ DISPLAY DATA (UNCHANGED LOGIC)
+        function displayData(data, isPending = false) {
+
+            const tableHead = document.querySelector("thead tr");
+            const tableBody = document.getElementById("tableBody");
+
+            tableHead.innerHTML = "";
+            tableBody.innerHTML = "";
+
+            if (CURRENT_MODULE === "enduser") {
+
+                tableHead.innerHTML = `
         <th>ID</th>
         <th>EndUser Name</th>
         <th>Env</th>
@@ -265,45 +290,45 @@ function displayData(data, isPending = false) {
         <th>Action</th>
         `;
 
-        if (!data || data.length === 0) {
-            tableBody.innerHTML = "<tr><td colspan='16'>No Data Found</td></tr>";
-            return;
-        }
+                if (!data || data.length === 0) {
+                    tableBody.innerHTML = "<tr><td colspan='16'>No Data Found</td></tr>";
+                    return;
+                }
 
-        data.forEach(item => {
+                data.forEach(item => {
 
-            let row = "<tr>";
+                    let row = "<tr>";
 
-            row += `<td>${item.id}</td>`;
-            row += `<td>${item.endUserName || ""}</td>`;
-            row += `<td>${item.environment || ""}</td>`;
-            row += `<td>${item.country || ""}</td>`;
-            row += `<td>${item.addressLine1 || ""}</td>`;
-            row += `<td>${item.addressLine2 || ""}</td>`;
-            row += `<td>${item.addressLine3 || ""}</td>`;
-            row += `<td>${item.city || ""}</td>`;
-            row += `<td>${item.state || ""}</td>`;
-            row += `<td>${item.postalCode || ""}</td>`;
-            row += `<td>${item.marketSegmentType || ""}</td>`;
-            row += `<td>${item.contactName || ""}</td>`;
-            row += `<td>${item.email || ""}</td>`;
-            row += `<td>${item.phoneNumber || ""}</td>`;
-            row += `<td>${item.tag || ""}</td>`;
+                    row += `<td>${item.id}</td>`;
+                    row += `<td>${item.endUserName || ""}</td>`;
+                    row += `<td>${item.environment || ""}</td>`;
+                    row += `<td>${item.country || ""}</td>`;
+                    row += `<td>${item.addressLine1 || ""}</td>`;
+                    row += `<td>${item.addressLine2 || ""}</td>`;
+                    row += `<td>${item.addressLine3 || ""}</td>`;
+                    row += `<td>${item.city || ""}</td>`;
+                    row += `<td>${item.state || ""}</td>`;
+                    row += `<td>${item.postalCode || ""}</td>`;
+                    row += `<td>${item.marketSegmentType || ""}</td>`;
+                    row += `<td>${item.contactName || ""}</td>`;
+                    row += `<td>${item.email || ""}</td>`;
+                    row += `<td>${item.phoneNumber || ""}</td>`;
+                    row += `<td>${item.tag || ""}</td>`;
 
-            if (isPending) {
-                row += `<td><button onclick="approveDelete(${item.id})">Approve</button></td>`;
+                    if (isPending) {
+                        row += `<td><button onclick="approveDelete(${item.id})">Approve</button></td>`;
+                    } else {
+                        row += `<td><button onclick="requestDelete(${item.id})">Delete</button></td>`;
+                    }
+
+                    row += "</tr>";
+
+                    tableBody.innerHTML += row;
+                });
+
             } else {
-                row += `<td><button onclick="requestDelete(${item.id})">Delete</button></td>`;
-            }
 
-            row += "</tr>";
-
-            tableBody.innerHTML += row;
-        });
-
-    } else {
-
-        tableHead.innerHTML = `
+                tableHead.innerHTML = `
         <th>ID</th>
         <th>Field</th>
         <th>Value</th>
@@ -313,53 +338,54 @@ function displayData(data, isPending = false) {
         <th>Action</th>
         `;
 
-        if (!data || data.length === 0) {
-            tableBody.innerHTML = "<tr><td colspan='7'>No Data Found</td></tr>";
-            return;
+                if (!data || data.length === 0) {
+                    tableBody.innerHTML = "<tr><td colspan='7'>No Data Found</td></tr>";
+                    return;
+                }
+
+                data.forEach(item => {
+
+                    let row = "<tr>";
+
+                    row += `<td>${item.id}</td>`;
+                    row += `<td>${item.fieldName}</td>`;
+                    row += `<td>${item.fieldValue}</td>`;
+                    row += `<td>${item.environment}</td>`;
+                    row += `<td>${item.country}</td>`;
+                    row += `<td>${item.tag || ""}</td>`;
+
+                    if (isPending) {
+                        row += `<td><button onclick="approveDelete(${item.id})">Approve</button></td>`;
+                    } else {
+                        row += `<td><button onclick="requestDelete(${item.id})">Delete</button></td>`;
+                    }
+
+                    row += "</tr>";
+
+                    tableBody.innerHTML += row;
+                });
+            }
         }
 
-        data.forEach(item => {
+        // ✅ DELETE
+        async function requestDelete(id) {
+            await fetch(`${getBaseUrl()}/${id}`, { method: "DELETE" });
+            setStatus("Delete requested");
+            loadAll();
+        }
 
-            let row = "<tr>";
+        // ✅ APPROVE DELETE
+        async function approveDelete(id) {
+            await fetch(`${getBaseUrl()}/admin/${id}`, { method: "DELETE" });
+            setStatus("Deleted");
+            loadPending();
+        }
 
-            row += `<td>${item.id}</td>`;
-            row += `<td>${item.fieldName}</td>`;
-            row += `<td>${item.fieldValue}</td>`;
-            row += `<td>${item.environment}</td>`;
-            row += `<td>${item.country}</td>`;
-            row += `<td>${item.tag || ""}</td>`;
+        // ✅ INIT
+        loadAll();
 
-            if (isPending) {
-                row += `<td><button onclick="approveDelete(${item.id})">Approve</button></td>`;
-            } else {
-                row += `<td><button onclick="requestDelete(${item.id})">Delete</button></td>`;
-            }
-
-            row += "</tr>";
-
-            tableBody.innerHTML += row;
-        });
-    }
-}
-
-// ✅ DELETE
-async function requestDelete(id) {
-    await fetch(`${getBaseUrl()}/${id}`, { method: "DELETE" });
-    setStatus("Delete requested");
-    loadAll();
-}
-
-// ✅ APPROVE DELETE
-async function approveDelete(id) {
-    await fetch(`${getBaseUrl()}/admin/${id}`, { method: "DELETE" });
-    setStatus("Deleted");
-    loadPending();
-}
-
-// ✅ INIT
-loadAll();
-
-</script>
+    </script>
 
 </body>
+
 </html>

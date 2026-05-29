@@ -33,6 +33,15 @@ public class TestDataService {
 
     // ✅ Save (Create + Update)
     public TestData save(TestData data) {
+
+        List<TestData> existing = repository.findByTagAndEnvironment(
+                data.getTag(),
+                data.getEnvironment());
+
+        if (!existing.isEmpty()) {
+            throw new RuntimeException("Duplicate tag found for environment: " + data.getTag());
+        }
+
         return repository.save(data);
     }
 

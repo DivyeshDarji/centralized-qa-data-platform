@@ -25,6 +25,15 @@ public class EndUserService {
         if (data.getDeleteStatus() == null) {
             data.setDeleteStatus("NONE");
         }
+
+        List<EndUser> existing = repository.findByTagAndEnvironment(
+                data.getTag(),
+                data.getEnvironment());
+
+        if (!existing.isEmpty()) {
+            throw new RuntimeException("Duplicate tag found for environment: " + data.getTag());
+        }
+
         return repository.save(data);
     }
 
