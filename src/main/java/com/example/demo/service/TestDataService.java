@@ -50,9 +50,35 @@ public class TestDataService {
         return repository.findById(id).orElse(null);
     }
 
-    // ✅ Delete request (soft delete logic later)
-    public void delete(Long id) {
+    /*
+     * // ✅ Delete request (soft delete logic later)
+     * public void delete(Long id) {
+     * repository.deleteById(id);
+     * }
+     */
+
+    // ✅ Soft delete request (mark as PENDING)
+    public TestData requestDelete(Long id) {
+        TestData data = getById(id);
+        if (data != null) {
+            data.setDeleteStatus("PENDING");
+            return repository.save(data);
+        }
+        return null;
+    }
+
+    // ✅ Approve delete (admin action)
+    public String approveDelete(Long id) {
+        TestData data = getById(id);
+        if (data == null)
+            return "Not Found";
+
+        if (!"PENDING".equals(data.getDeleteStatus())) {
+            return "Not Pending";
+        }
+
         repository.deleteById(id);
+        return "Deleted";
     }
 
     // ✅ Filter (important for your requirement)

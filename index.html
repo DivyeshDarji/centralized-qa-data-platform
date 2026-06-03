@@ -114,11 +114,12 @@
     <div class="content">
 
         <h3>🔍 Search Data</h3>
+        <p id="validationMsg" style="color:red;"></p>
 
-        <input id="fieldName" placeholder="Field Name / Value (optional)">
-        <input id="country" placeholder="Country (optional)">
+        <input id="fieldName" placeholder="Field Name / Value (optional)" oninput="validateInputs()">
+        <input id="country" placeholder="Country (optional)" oninput="validateInputs()">
 
-        <button onclick="searchData()">Search</button>
+        <button id="searchBtn" onclick="searchData()">Search</button>
         <button onclick="loadAll()">Load All</button>
 
         <hr>
@@ -164,8 +165,9 @@
         function setStatus(msg, isError = false) {
             const el = document.getElementById("status");
             el.innerText = msg;
-            el.style.color = isError ? "red" : "green";
+            el.style.color = isError ? "#e74c3c" : "#2ecc71"; // better colors
         }
+
 
         // ✅ LOAD ALL
         async function loadAll() {
@@ -202,8 +204,7 @@
             let country = document.getElementById("country").value;
             let env = document.getElementById("globalEnv").value;
 
-            if (!fieldName && !country) {
-                setStatus("Please enter at least one filter", true);
+            if (!validateInputs()) {
                 return;
             }
 
@@ -383,6 +384,33 @@
 
         // ✅ INIT
         loadAll();
+
+        // ✅ VALIDATION
+        function validateInputs() {
+
+            const field = document.getElementById("fieldName").value.trim();
+            const country = document.getElementById("country").value.trim();
+            const msg = document.getElementById("validationMsg");
+
+            msg.innerText = "";
+
+            const btn = document.getElementById("searchBtn");
+
+            if (!field && !country) {
+                msg.innerText = "Enter at least one search field";
+                btn.disabled = true;
+                return false;
+            }
+
+            if (country && country.length !== 2) {
+                msg.innerText = "Country must be 2-letter code (e.g., US, IN)";
+                btn.disabled = true;
+                return false;
+            }
+
+            btn.disabled = false;
+            return true;
+        }
 
     </script>
 
