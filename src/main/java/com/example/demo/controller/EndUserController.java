@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,10 +33,12 @@ public class EndUserController {
         return service.getAll();
     }
 
-    @PostMapping
-    public EndUser create(@RequestBody EndUser data) {
-        return service.save(data);
-    }
+    // @PostMapping
+    /*
+     * public EndUser create(@RequestBody EndUser data) {
+     * return service.save(data);
+     * }
+     */
 
     @GetMapping("/search")
     public List<EndUser> search(
@@ -85,6 +88,15 @@ public class EndUserController {
 
         } catch (Exception e) {
             return "Error: " + e.getMessage();
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<?> create(@RequestBody EndUser data) {
+        try {
+            return ResponseEntity.ok(service.save(data));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 

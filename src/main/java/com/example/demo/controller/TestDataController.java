@@ -58,36 +58,50 @@ public class TestDataController {
     // ✅ SOFT DELETE (will replace hard delete later)
     // When delete is requested, set deleteStatus to PENDING. Admin will later
     // approve and set to APPROVED
+    /*
+     * @DeleteMapping("/{id}")
+     * public TestData requestDelete(@PathVariable Long id) {
+     * 
+     * TestData data = service.getById(id);
+     * 
+     * if (data == null) {
+     * throw new RuntimeException("Data not found");
+     * }
+     * 
+     * data.setDeleteStatus("PENDING"); // mark for deletion
+     * 
+     * return service.save(data);
+     * }
+     */
+
+    /*
+     * @DeleteMapping("/admin/{id}")
+     * public String approveDelete(@PathVariable Long id) {
+     * 
+     * TestData data = service.getById(id);
+     * 
+     * if (data == null) {
+     * throw new RuntimeException("Data not found");
+     * }
+     * 
+     * if (!"PENDING".equals(data.getDeleteStatus())) {
+     * return "Delete request not pending";
+     * }
+     * 
+     * service.delete(id); // hard delete the record
+     * 
+     * return "Record deleted successfully";
+     * }
+     */
+
     @DeleteMapping("/{id}")
     public TestData requestDelete(@PathVariable Long id) {
-
-        TestData data = service.getById(id);
-
-        if (data == null) {
-            throw new RuntimeException("Data not found");
-        }
-
-        data.setDeleteStatus("PENDING"); // mark for deletion
-
-        return service.save(data);
+        return service.requestDelete(id);
     }
 
     @DeleteMapping("/admin/{id}")
     public String approveDelete(@PathVariable Long id) {
-
-        TestData data = service.getById(id);
-
-        if (data == null) {
-            throw new RuntimeException("Data not found");
-        }
-
-        if (!"PENDING".equals(data.getDeleteStatus())) {
-            return "Delete request not pending";
-        }
-
-        service.delete(id); // hard delete the record
-
-        return "Record deleted successfully";
+        return service.approveDelete(id);
     }
 
     // ✅ FILTER API
