@@ -117,7 +117,19 @@
         <p id="validationMsg" style="color:red;"></p>
 
         <input id="fieldName" placeholder="Field Name / Value (optional)" oninput="validateInputs()">
-        <input id="country" placeholder="Country (optional)" oninput="validateInputs()">
+        <select id="country" onchange="validateInputs()">
+            <option value="">Select Country (optional)</option>
+            <option value="US">US</option>
+            <option value="IN">IN</option>
+            <option value="CA">CA</option>
+            <option value="MX">MX</option>
+            <option value="DE">DE</option>
+            <option value="FR">FR</option>
+            <option value="IT">IT</option>
+            <option value="AU">AU</option>
+            <option value="ES">ES</option>
+            <option value="UK">UK</option>
+        </select>
 
         <button id="searchBtn" onclick="searchData()">Search</button>
         <button onclick="loadAll()">Load All</button>
@@ -391,19 +403,12 @@
             const field = document.getElementById("fieldName").value.trim();
             const country = document.getElementById("country").value.trim();
             const msg = document.getElementById("validationMsg");
+            const btn = document.getElementById("searchBtn");
 
             msg.innerText = "";
 
-            const btn = document.getElementById("searchBtn");
-
             if (!field && !country) {
                 msg.innerText = "Enter at least one search field";
-                btn.disabled = true;
-                return false;
-            }
-
-            if (country && country.length !== 2) {
-                msg.innerText = "Country must be 2-letter code (e.g., US, IN)";
                 btn.disabled = true;
                 return false;
             }
