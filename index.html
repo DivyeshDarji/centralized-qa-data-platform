@@ -116,9 +116,9 @@
         <h3>🔍 Search Data</h3>
         <p id="validationMsg" style="color:red;"></p>
 
-        <input id="fieldName" placeholder="Field Name / Value (optional)" oninput="validateInputs()">
+        <!-- input id="fieldName" placeholder="Field Name / Value (optional)" oninput="validateInputs()" -->
         <select id="country" onchange="validateInputs()">
-            <option value="">Select Country (optional)</option>
+            <option value="">Select Country</option>
             <option value="US">US</option>
             <option value="IN">IN</option>
             <option value="CA">CA</option>
@@ -212,7 +212,7 @@
         // ✅ SEARCH
         async function searchData() {
 
-            let fieldName = document.getElementById("fieldName").value;
+            //let fieldName = document.getElementById("fieldName").value;
             let country = document.getElementById("country").value;
             let env = document.getElementById("globalEnv").value;
 
@@ -225,7 +225,7 @@
 
                 let url = getBaseUrl() + `/search?environment=${env}`;
 
-                if (fieldName) url += `&fieldName=${fieldName}`;
+                //if (fieldName) url += `&fieldName=${fieldName}`;
                 if (country) url += `&country=${country}`;
 
                 const res = await fetch(url);
@@ -400,15 +400,15 @@
         // ✅ VALIDATION
         function validateInputs() {
 
-            const field = document.getElementById("fieldName").value.trim();
+            //const field = document.getElementById("fieldName").value.trim();
             const country = document.getElementById("country").value.trim();
             const msg = document.getElementById("validationMsg");
             const btn = document.getElementById("searchBtn");
 
             msg.innerText = "";
 
-            if (!field && !country) {
-                msg.innerText = "Enter at least one search field";
+            if (!country) {
+                msg.innerText = "Please select a country";
                 btn.disabled = true;
                 return false;
             }
