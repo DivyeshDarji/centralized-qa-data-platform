@@ -124,27 +124,57 @@
             height: calc(100vh - 60px);
         }
 
-        /* ✅ SIDEBAR */
+        /* ✅ SIDEBAR BASE */
         .sidebar {
-            width: 200px;
-            background: #1f2d3d;
+            width: 60px;
+            background: #e0e8f5;
             color: white;
+            transition: width 0.3s;
+            overflow: hidden;
+        }
+
+        /* ✅ EXPAND ON HOVER */
+        .sidebar:hover {
+            width: 200px;
         }
 
         /* ✅ MENU ITEM */
         .menu-item {
+            display: flex;
+            align-items: center;
             padding: 15px;
             cursor: pointer;
-            border-bottom: 1px solid #34495e;
+            gap: 10px;
         }
 
-        .menu-item:hover {
-            background: #34495e;
+        /* ✅ ICON */
+        .icon {
+            font-size: 18px;
+            width: 25px;
         }
 
+        /* ✅ TEXT HIDDEN BY DEFAULT */
+        .text {
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        /* ✅ SHOW TEXT ON HOVER */
+        .sidebar:hover .text {
+            opacity: 1;
+        }
+
+        /* ✅ ACTIVE ITEM */
         .menu-item.active {
-            background: #3498db;
-            font-weight: bold;
+            background: #cfd6df;
+            color: #2c3e50;
+            border-radius: 30px;
+        }
+
+        /* ✅ HOVER EFFECT */
+        .menu-item:hover {
+            background: #afd2f4;
         }
 
         /* ✅ MAIN CONTENT */
@@ -260,6 +290,17 @@
                 transform: rotate(360deg) translate(-50%, -50%);
             }
         }
+
+        /* ✅ ADMIN BUTTON */
+        .btn-admin {
+            background-color: #f39c12;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .btn-admin:hover {
+            background-color: #d68910;
+        }
     </style>
 </head>
 
@@ -282,14 +323,16 @@
         <div class="controls">
 
             <!-- ENV -->
-            <select id="globalEnv" onchange="loadAll()">
-                <option>QA</option>
+            <label>Env:</label>
+            <select id="globalEnv" onchange="handleFilterChange()">
+                <option selected>QA</option>
                 <option>UAT</option>
                 <option>PROD</option>
             </select>
 
             <!-- COUNTRY -->
-            <select id="country" onchange="validateInputs()">
+            <label>Country:</label>
+            <select id="country" onchange="handleFilterChange()">
                 <option value="US" selected>US</option>
                 <option value="IN">IN</option>
                 <option value="CA">CA</option>
@@ -302,9 +345,13 @@
                 <option value="UK">UK</option>
             </select>
 
-            <!-- SEARCH BUTTON -->
-            <button id="searchBtn" onclick="searchData()">🔍 Search</button>
+            <!-- SEARCH BUTTON
+            <button id="searchBtn" onclick="searchData()">🔍 Search</button> -->
 
+            <!-- ADMIN BUTTON -->
+            <button class="btn-admin" onclick="loadPending()"> Admin</button>
+
+            <!-- REFRESH BUTTON -->
             <button onclick="loadAll()">🔄 Refresh</button>
 
         </div>
@@ -318,11 +365,13 @@
         <div class="sidebar">
 
             <div class="menu-item active" onclick="switchModule('testdata', this)">
-                📂 Test Data
+                <span class="icon">📂</span>
+                <span class="text">Test Data</span>
             </div>
 
             <div class="menu-item" onclick="switchModule('enduser', this)">
-                👤 EndUser
+                <span class="icon">👤</span>
+                <span class="text">End User</span>
             </div>
 
         </div>
@@ -335,14 +384,8 @@
 
                 <p id="validationMsg" style="color:red;"></p>
 
-                <h3>🛑 Pending Delete Requests (Admin)</h3>
-                <button onclick="loadPending()">View Pending</button>
-
-                <hr>
-
-                <h3>📄 Sample Test Data</h3>
-
                 <div class="table-container">
+                    <h2 id="pageTitle"></h2>
                     <table>
                         <thead>
                             <tr></tr>
@@ -361,12 +404,17 @@
                 let CURRENT_MODULE = "testdata";
 
                 // ✅ SWITCH MODULE (TABS)
-                function switchModule(module, element) {
+                function switchModule(moduleName, element) {
 
-                    CURRENT_MODULE = module;
+                    CURRENT_MODULE = moduleName;
 
-                    document.querySelectorAll(".menu-item").forEach(tab => tab.classList.remove("active"));
+                    document.querySelectorAll(".menu-item")
+                        .forEach(item => item.classList.remove("active"));
+
                     element.classList.add("active");
+
+                    // ✅ Dynamic title update
+                    updatePageTitle(moduleName);
 
                     loadAll();
                 }
@@ -389,8 +437,9 @@
                         showLoader();
 
                         let env = document.getElementById("globalEnv").value;
+                        let country = document.getElementById("country").value;
 
-                        const res = await fetch(getBaseUrl() + `/search?environment=${env}`);
+                        const res = await fetch(getBaseUrl() + `/search?environment=${env}&country=${country}`);
 
                         // ✅ CHECK RESPONSE
                         if (!res.ok) {
@@ -411,7 +460,7 @@
                     finally {
                         hideLoader();
                     }
-
+                    updatePageTitle(CURRENT_MODULE);
                 }
 
                 // ✅ SEARCH
@@ -470,6 +519,9 @@
                         const data = await res.json();
 
                         displayData(data, true);
+
+                        // ✅ Dynamic title update
+                        updatePageTitle(null, true);
 
                         setStatus("Pending loaded");
 
@@ -608,14 +660,17 @@
                 }
 
                 // ✅ SWITCH MODULE (SIDEBAR)
-                function switchModule(module, element) {
+                function switchModule(moduleName, element) {
 
-                    CURRENT_MODULE = module;
+                    CURRENT_MODULE = moduleName;
 
                     document.querySelectorAll(".menu-item")
                         .forEach(item => item.classList.remove("active"));
 
                     element.classList.add("active");
+
+                    // ✅ Dynamic title update
+                    updatePageTitle(moduleName);
 
                     loadAll();
                 }
@@ -648,7 +703,27 @@
                     document.getElementById("loader").style.display = "none";
                 }
 
+                function handleFilterChange() {
+                    loadAll();
+                }
 
+                // ✅ UPDATE PAGE TITLE
+                function updatePageTitle(moduleName, isAdmin = false) {
+
+                    const title = document.getElementById("pageTitle");
+
+                    if (isAdmin) {
+                        title.innerText = "👮 Admin - Pending Approval Data";
+                        return;
+                    }
+
+                    // ✅ Capitalize first letter (for clean display)
+                    const formatted =
+                        moduleName.charAt(0).toUpperCase() +
+                        moduleName.slice(1);
+
+                    title.innerText = `📄 Sample Test Data: ${formatted}`;
+                }
             </script>
 
         </div>
