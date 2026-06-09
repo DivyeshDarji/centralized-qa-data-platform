@@ -6,9 +6,19 @@
 
     <style>
         body {
-            font-family: Arial;
-            margin: 0;
-            background: #f5f7fa;
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        h2 {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        h3 {
+            font-size: 18px;
+            font-weight: 500;
         }
 
         /* ✅ HEADER */
@@ -33,6 +43,14 @@
 
         .controls {
             text-align: right;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .controls label {
+            font-size: 13px;
+            font-weight: 500;
         }
 
         .controls select,
@@ -66,13 +84,12 @@
             padding: 20px;
         }
 
-        select,
-        input {
-            padding: 6px;
-            border: 1px solid #ccc;
+        select {
+            padding: 5px 8px;
             border-radius: 5px;
-            outline: none;
+            font-size: 13px;
         }
+
 
         select:focus,
         input:focus {
@@ -84,6 +101,7 @@
             border-collapse: collapse;
             width: 100%;
             background: white;
+            border-spacing: 0;
         }
 
         th,
@@ -96,6 +114,7 @@
 
         td {
             vertical-align: middle;
+            font-size: 13px;
         }
 
         tbody tr:nth-child(even) {
@@ -112,6 +131,8 @@
 
         th {
             background-color: #ecf0f1;
+            font-weight: 600;
+            font-size: 13px;
         }
 
         .status {
@@ -131,6 +152,7 @@
             color: white;
             transition: width 0.3s;
             overflow: hidden;
+            font-size: 14px;
         }
 
         /* ✅ EXPAND ON HOVER */
@@ -142,9 +164,10 @@
         .menu-item {
             display: flex;
             align-items: center;
-            padding: 15px;
+            padding: 12px 15px;
             cursor: pointer;
             gap: 10px;
+            font-size: 14px;
         }
 
         /* ✅ ICON */
@@ -169,7 +192,7 @@
         .menu-item.active {
             background: #cfd6df;
             color: #2c3e50;
-            border-radius: 30px;
+            border-radius: 20px;
         }
 
         /* ✅ HOVER EFFECT */
@@ -186,35 +209,47 @@
 
         /* ✅ Buttons */
         button {
-            padding: 6px 12px;
+            padding: 6px 14px;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
             cursor: pointer;
-            background-color: #3498db;
-            color: white;
-            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
 
-        button:hover {
-            background-color: #2980b9;
+        /* ✅ Primary (Refresh / search) */
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
         }
 
         /* ✅ Delete */
         .btn-delete {
-            background-color: #e74c3c;
+            background: #ea5848;
+            color: #ffffff;
+            font-size: 13px;
+            padding: 5px 10px;
         }
 
         .btn-delete:hover {
-            background-color: #c0392b;
+            background: #c0392b;
         }
 
         /* ✅ Approve */
         .btn-approve {
-            background-color: #2ecc71;
+            background: #2ecc71;
+            color: white;
         }
 
         .btn-approve:hover {
-            background-color: #27ae60;
+            background: #27ae60;
         }
 
         /* ✅ TABLE CONTAINER */
@@ -293,13 +328,12 @@
 
         /* ✅ ADMIN BUTTON */
         .btn-admin {
-            background-color: #f39c12;
+            background: #f39c12;
             color: white;
-            border-radius: 5px;
         }
 
         .btn-admin:hover {
-            background-color: #d68910;
+            background: #d68910;
         }
     </style>
 </head>
@@ -349,10 +383,10 @@
             <button id="searchBtn" onclick="searchData()">🔍 Search</button> -->
 
             <!-- ADMIN BUTTON -->
-            <button class="btn-admin" onclick="loadPending()"> Admin</button>
+            <button class="btn-admin" onclick="loadPending()">🛑 Admin</button>
 
             <!-- REFRESH BUTTON -->
-            <button onclick="loadAll()">🔄 Refresh</button>
+            <button class="btn-primary" onclick="loadAll()">🔄 Refresh</button>
 
         </div>
 
