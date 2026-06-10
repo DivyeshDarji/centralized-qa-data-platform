@@ -2,28 +2,61 @@
 <html>
 
 <head>
-    <title>Centralized QA Data Platform</title>
+    <title>Data Platform</title>
 
     <style>
         body {
-            font-family: Arial;
-            margin: 0;
-            background: #f5f7fa;
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        h2 {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        h3 {
+            font-size: 18px;
+            font-weight: 500;
         }
 
         /* ✅ HEADER */
         .header {
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
             align-items: center;
             padding: 10px 20px;
             background: #ffffff;
             border-bottom: 1px solid #ccc;
         }
 
+        .logo {
+            text-align: left;
+        }
+
         .title {
+            text-align: center;
             font-size: 20px;
             font-weight: bold;
+        }
+
+        .controls {
+            text-align: right;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .controls label {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .controls select,
+        .controls button {
+            margin-left: 8px;
+            padding: 5px;
         }
 
         /* ✅ TABS */
@@ -51,15 +84,16 @@
             padding: 20px;
         }
 
-        input,
         select {
-            padding: 5px;
-            margin: 5px;
+            padding: 5px 8px;
+            border-radius: 5px;
+            font-size: 13px;
         }
 
-        button {
-            padding: 6px 10px;
-            margin: 5px;
+
+        select:focus,
+        input:focus {
+            border-color: #3498db;
         }
 
         table {
@@ -67,20 +101,239 @@
             border-collapse: collapse;
             width: 100%;
             background: white;
+            border-spacing: 0;
         }
 
         th,
         td {
             border: 1px solid #ccc;
-            padding: 8px;
+            padding: 10px;
+            /* increased for readability */
+            text-align: left;
+        }
+
+        td {
+            vertical-align: middle;
+            font-size: 13px;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tbody tr:hover {
+            background-color: #eef6ff;
+        }
+
+        table tr:hover {
+            background-color: #f9f9f9;
         }
 
         th {
-            background: #f2f2f2;
+            background-color: #ecf0f1;
+            font-weight: 600;
+            font-size: 13px;
         }
 
         .status {
             padding: 10px;
+        }
+
+        /* ✅ LAYOUT */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+
+        /* ✅ SIDEBAR BASE */
+        .sidebar {
+            width: 60px;
+            background: #e0e8f5;
+            color: white;
+            transition: width 0.3s;
+            overflow: hidden;
+            font-size: 14px;
+        }
+
+        /* ✅ EXPAND ON HOVER */
+        .sidebar:hover {
+            width: 200px;
+        }
+
+        /* ✅ MENU ITEM */
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            cursor: pointer;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        /* ✅ ICON */
+        .icon {
+            font-size: 18px;
+            width: 25px;
+        }
+
+        /* ✅ TEXT HIDDEN BY DEFAULT */
+        .text {
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        /* ✅ SHOW TEXT ON HOVER */
+        .sidebar:hover .text {
+            opacity: 1;
+        }
+
+        /* ✅ ACTIVE ITEM */
+        .menu-item.active {
+            background: #cfd6df;
+            color: #2c3e50;
+            border-radius: 20px;
+        }
+
+        /* ✅ HOVER EFFECT */
+        .menu-item:hover {
+            background: #afd2f4;
+        }
+
+        /* ✅ MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        /* ✅ Buttons */
+        button {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* ✅ Primary (Refresh / search) */
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        /* ✅ Delete */
+        .btn-delete {
+            background: #ea5848;
+            color: #ffffff;
+            font-size: 13px;
+            padding: 5px 10px;
+        }
+
+        .btn-delete:hover {
+            background: #c0392b;
+        }
+
+        /* ✅ Approve */
+        .btn-approve {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background: #27ae60;
+        }
+
+        /* ✅ TABLE CONTAINER */
+        .table-container {
+            max-height: 400px;
+            /* adjust if needed */
+            overflow-y: auto;
+            border: 1px solid #ccc;
+        }
+
+        /* ✅ STICKY HEADER */
+        thead th {
+            position: sticky;
+            top: 0;
+            background: #ecf0f1;
+            z-index: 2;
+        }
+
+        /* ✅ TOAST */
+        .toast {
+            visibility: hidden;
+            min-width: 300px;
+            background: #333;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .toast.show {
+            visibility: visible;
+        }
+
+        .toast.success {
+            background: #2ecc71;
+        }
+
+        .toast.error {
+            background: #e74c3c;
+        }
+
+        .toast button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* ✅ LOADER */
+        .loader {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            border: 5px solid #ccc;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg) translate(-50%, -50%);
+            }
+        }
+
+        /* ✅ ADMIN BUTTON */
+        .btn-admin {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-admin:hover {
+            background: #d68910;
         }
     </style>
 </head>
@@ -89,202 +342,240 @@
 
     <!-- ✅ HEADER -->
     <div class="header">
-        <div class="title">Centralized QA Data Platform</div>
 
-        <div>
+        <!-- ✅ LEFT: LOGO -->
+        <div class="logo">
+            <img src="Ingram_micro_logo.png" alt="logo" height="35">
+        </div>
+
+        <!-- ✅ CENTER: TITLE -->
+        <div class="title">
+            Centralized QA Data Platform
+        </div>
+
+        <!-- ✅ RIGHT: CONTROLS -->
+        <div class="controls">
+
+            <!-- ENV -->
             <label>Env:</label>
-            <select id="globalEnv" onchange="loadAll()">
-                <option>QA</option>
+            <select id="globalEnv" onchange="handleFilterChange()">
+                <option selected>QA</option>
                 <option>UAT</option>
                 <option>PROD</option>
             </select>
+
+            <!-- COUNTRY -->
+            <label>Country:</label>
+            <select id="country" onchange="handleFilterChange()">
+                <option value="US" selected>US</option>
+                <option value="IN">IN</option>
+                <option value="CA">CA</option>
+                <option value="MX">MX</option>
+                <option value="DE">DE</option>
+                <option value="FR">FR</option>
+                <option value="IT">IT</option>
+                <option value="AU">AU</option>
+                <option value="ES">ES</option>
+                <option value="UK">UK</option>
+            </select>
+
+            <!-- SEARCH BUTTON
+            <button id="searchBtn" onclick="searchData()">🔍 Search</button> -->
+
+            <!-- ADMIN BUTTON -->
+            <button class="btn-admin" onclick="loadPending()">🛑 Admin</button>
+
+            <!-- REFRESH BUTTON -->
+            <button class="btn-primary" onclick="loadAll()">🔄 Refresh</button>
+
         </div>
-    </div>
-
-    <!-- ✅ STATUS -->
-    <p id="status" class="status"></p>
-
-    <!-- ✅ MODULE TABS -->
-    <div class="tabs">
-        <div class="tab active" onclick="switchModule('testdata', this)">Test Data</div>
-        <div class="tab" onclick="switchModule('enduser', this)">EndUser</div>
-    </div>
-
-    <!-- ✅ CONTENT -->
-    <div class="content">
-
-        <h3>🔍 Search Data</h3>
-        <p id="validationMsg" style="color:red;"></p>
-
-        <!-- input id="fieldName" placeholder="Field Name / Value (optional)" oninput="validateInputs()" -->
-        <select id="country" onchange="validateInputs()">
-            <option value="">Select Country</option>
-            <option value="US">US</option>
-            <option value="IN">IN</option>
-            <option value="CA">CA</option>
-            <option value="MX">MX</option>
-            <option value="DE">DE</option>
-            <option value="FR">FR</option>
-            <option value="IT">IT</option>
-            <option value="AU">AU</option>
-            <option value="ES">ES</option>
-            <option value="UK">UK</option>
-        </select>
-
-        <button id="searchBtn" onclick="searchData()">Search</button>
-        <button onclick="loadAll()">Load All</button>
-
-        <hr>
-
-        <h3>🛑 Pending Delete Requests (Admin)</h3>
-        <button onclick="loadPending()">View Pending</button>
-
-        <hr>
-
-        <h3>📄 Data</h3>
-
-        <table>
-            <thead>
-                <tr></tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-        </table>
 
     </div>
 
-    <script>
+    <!-- ✅ TABS -->
+    <div class="main-layout">
 
-        // ✅ MODULE
-        let CURRENT_MODULE = "testdata";
+        <!-- ✅ SIDEBAR -->
+        <div class="sidebar">
 
-        // ✅ SWITCH MODULE (TABS)
-        function switchModule(module, element) {
+            <div class="menu-item active" onclick="switchModule('testdata', this)">
+                <span class="icon">📂</span>
+                <span class="text">Test Data</span>
+            </div>
 
-            CURRENT_MODULE = module;
+            <div class="menu-item" onclick="switchModule('enduser', this)">
+                <span class="icon">👤</span>
+                <span class="text">End User</span>
+            </div>
 
-            document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
-            element.classList.add("active");
+        </div>
 
-            loadAll();
-        }
+        <!-- ✅ MAIN CONTENT -->
+        <div class="main-content">
 
-        // ✅ BASE URL
-        function getBaseUrl() {
-            return `http://localhost:8080/${CURRENT_MODULE}`;
-        }
+            <!-- ✅ CONTENT -->
+            <div class="content">
 
-        // ✅ STATUS
-        function setStatus(msg, isError = false) {
-            const el = document.getElementById("status");
-            el.innerText = msg;
-            el.style.color = isError ? "#e74c3c" : "#2ecc71"; // better colors
-        }
+                <p id="validationMsg" style="color:red;"></p>
+
+                <div class="table-container">
+                    <h2 id="pageTitle"></h2>
+                    <table>
+                        <thead>
+                            <tr></tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+
+            </div>
 
 
-        // ✅ LOAD ALL
-        async function loadAll() {
 
-            try {
-                setStatus("Loading...");
+            <script>
 
-                let env = document.getElementById("globalEnv").value;
+                // ✅ MODULE
+                let CURRENT_MODULE = "testdata";
 
-                const res = await fetch(getBaseUrl() + `/search?environment=${env}`);
+                // ✅ SWITCH MODULE (TABS)
+                function switchModule(moduleName, element) {
 
-                // ✅ CHECK RESPONSE
-                if (!res.ok) {
-                    let error = await res.text();
-                    setStatus(error, true);
-                    return;
+                    CURRENT_MODULE = moduleName;
+
+                    document.querySelectorAll(".menu-item")
+                        .forEach(item => item.classList.remove("active"));
+
+                    element.classList.add("active");
+
+                    // ✅ Dynamic title update
+                    updatePageTitle(moduleName);
+
+                    loadAll();
                 }
 
-                const data = await res.json();
-
-                displayData(data);
-
-                setStatus("Loaded successfully");
-
-            } catch (err) {
-                setStatus("Error loading data", true);
-            }
-        }
-
-        // ✅ SEARCH
-        async function searchData() {
-
-            //let fieldName = document.getElementById("fieldName").value;
-            let country = document.getElementById("country").value;
-            let env = document.getElementById("globalEnv").value;
-
-            if (!validateInputs()) {
-                return;
-            }
-
-            try {
-                setStatus("Searching...");
-
-                let url = getBaseUrl() + `/search?environment=${env}`;
-
-                //if (fieldName) url += `&fieldName=${fieldName}`;
-                if (country) url += `&country=${country}`;
-
-                const res = await fetch(url);
-
-                // ✅ CHECK RESPONSE
-                if (!res.ok) {
-                    let error = await res.text();
-                    setStatus(error, true);
-                    return;
+                // ✅ BASE URL
+                function getBaseUrl() {
+                    return `http://localhost:8080/${CURRENT_MODULE}`;
                 }
 
-                const data = await res.json();
-
-                displayData(data);
-
-                setStatus("Search complete");
-
-            } catch (err) {
-                setStatus("Search failed", true);
-            }
-        }
-
-        // ✅ PENDING
-        async function loadPending() {
-            try {
-                setStatus("Loading pending...");
-
-                const res = await fetch(getBaseUrl() + "/pending");
-
-                // ✅ CHECK RESPONSE
-                if (!res.ok) {
-                    let error = await res.text();
-                    setStatus(error, true);
-                    return;
+                // ✅ STATUS
+                function setStatus(msg, isError = false) {
+                    showToast(msg, isError);
                 }
 
-                const data = await res.json();
 
-                displayData(data, true);
+                // ✅ LOAD ALL
+                async function loadAll() {
 
-                setStatus("Pending loaded");
+                    try {
+                        showLoader();
 
-            } catch (err) {
-                setStatus("Error loading pending", true);
-            }
-        }
+                        let env = document.getElementById("globalEnv").value;
+                        let country = document.getElementById("country").value;
 
-        // ✅ DISPLAY DATA (UNCHANGED LOGIC)
-        function displayData(data, isPending = false) {
+                        const res = await fetch(getBaseUrl() + `/search?environment=${env}&country=${country}`);
 
-            const tableHead = document.querySelector("thead tr");
-            const tableBody = document.getElementById("tableBody");
+                        // ✅ CHECK RESPONSE
+                        if (!res.ok) {
+                            let error = await res.text();
+                            setStatus(error, true);
+                            return;
+                        }
 
-            tableHead.innerHTML = "";
-            tableBody.innerHTML = "";
+                        const data = await res.json();
 
-            if (CURRENT_MODULE === "enduser") {
+                        displayData(data);
 
-                tableHead.innerHTML = `
+                        setStatus("Loaded successfully");
+
+                    } catch (err) {
+                        setStatus("Error loading data", true);
+                    }
+                    finally {
+                        hideLoader();
+                    }
+                    updatePageTitle(CURRENT_MODULE);
+                }
+
+                // ✅ SEARCH
+                async function searchData() {
+
+                    //let fieldName = document.getElementById("fieldName").value;
+                    let country = document.getElementById("country").value;
+                    let env = document.getElementById("globalEnv").value;
+
+                    if (!validateInputs()) {
+                        return;
+                    }
+
+                    try {
+                        searchData();
+
+                        let url = getBaseUrl() + `/search?environment=${env}`;
+
+                        //if (fieldName) url += `&fieldName=${fieldName}`;
+                        if (country) url += `&country=${country}`;
+
+                        const res = await fetch(url);
+
+                        // ✅ CHECK RESPONSE
+                        if (!res.ok) {
+                            let error = await res.text();
+                            setStatus(error, true);
+                            return;
+                        }
+
+                        const data = await res.json();
+
+                        displayData(data);
+
+                        setStatus("Search complete");
+
+                    } catch (err) {
+                        setStatus("Search failed", true);
+                    } finally { hideLoader() }
+                }
+
+                // ✅ PENDING
+                async function loadPending() {
+                    try {
+                        showLoader();
+
+                        const res = await fetch(getBaseUrl() + "/pending");
+
+                        // ✅ CHECK RESPONSE
+                        if (!res.ok) {
+                            let error = await res.text();
+                            setStatus(error, true);
+                            return;
+                        }
+
+                        const data = await res.json();
+
+                        displayData(data, true);
+
+                        // ✅ Dynamic title update
+                        updatePageTitle(null, true);
+
+                        setStatus("Pending loaded");
+
+                    } catch (err) {
+                        setStatus("Error loading pending", true);
+                    } finally { hideLoader() }
+                }
+
+                // ✅ DISPLAY DATA (UNCHANGED LOGIC)
+                function displayData(data, isPending = false) {
+
+                    const tableHead = document.querySelector("thead tr");
+                    const tableBody = document.getElementById("tableBody");
+
+                    tableHead.innerHTML = "";
+                    tableBody.innerHTML = "";
+
+                    if (CURRENT_MODULE === "enduser") {
+
+                        tableHead.innerHTML = `
         <th>ID</th>
         <th>EndUser Name</th>
         <th>Env</th>
@@ -303,45 +594,45 @@
         <th>Action</th>
         `;
 
-                if (!data || data.length === 0) {
-                    tableBody.innerHTML = "<tr><td colspan='16'>No Data Found</td></tr>";
-                    return;
-                }
+                        if (!data || data.length === 0) {
+                            tableBody.innerHTML = "<tr><td colspan='16'>No Data Found</td></tr>";
+                            return;
+                        }
 
-                data.forEach(item => {
+                        data.forEach(item => {
 
-                    let row = "<tr>";
+                            let row = "<tr>";
 
-                    row += `<td>${item.id}</td>`;
-                    row += `<td>${item.endUserName || ""}</td>`;
-                    row += `<td>${item.environment || ""}</td>`;
-                    row += `<td>${item.country || ""}</td>`;
-                    row += `<td>${item.addressLine1 || ""}</td>`;
-                    row += `<td>${item.addressLine2 || ""}</td>`;
-                    row += `<td>${item.addressLine3 || ""}</td>`;
-                    row += `<td>${item.city || ""}</td>`;
-                    row += `<td>${item.state || ""}</td>`;
-                    row += `<td>${item.postalCode || ""}</td>`;
-                    row += `<td>${item.marketSegmentType || ""}</td>`;
-                    row += `<td>${item.contactName || ""}</td>`;
-                    row += `<td>${item.email || ""}</td>`;
-                    row += `<td>${item.phoneNumber || ""}</td>`;
-                    row += `<td>${item.tag || ""}</td>`;
+                            row += `<td>${item.id}</td>`;
+                            row += `<td>${item.endUserName || ""}</td>`;
+                            row += `<td>${item.environment || ""}</td>`;
+                            row += `<td>${item.country || ""}</td>`;
+                            row += `<td>${item.addressLine1 || ""}</td>`;
+                            row += `<td>${item.addressLine2 || ""}</td>`;
+                            row += `<td>${item.addressLine3 || ""}</td>`;
+                            row += `<td>${item.city || ""}</td>`;
+                            row += `<td>${item.state || ""}</td>`;
+                            row += `<td>${item.postalCode || ""}</td>`;
+                            row += `<td>${item.marketSegmentType || ""}</td>`;
+                            row += `<td>${item.contactName || ""}</td>`;
+                            row += `<td>${item.email || ""}</td>`;
+                            row += `<td>${item.phoneNumber || ""}</td>`;
+                            row += `<td>${item.tag || ""}</td>`;
 
-                    if (isPending) {
-                        row += `<td><button onclick="approveDelete(${item.id})">Approve</button></td>`;
+                            if (isPending) {
+                                row += `<td><button class="btn-approve" onclick="approveDelete(${item.id})">✅ Approve</button></td>`;
+                            } else {
+                                row += `<td><button class="btn-delete" onclick="requestDelete(${item.id})">🗑 Delete</button></td>`;
+                            }
+
+                            row += "</tr>";
+
+                            tableBody.innerHTML += row;
+                        });
+
                     } else {
-                        row += `<td><button onclick="requestDelete(${item.id})">Delete</button></td>`;
-                    }
 
-                    row += "</tr>";
-
-                    tableBody.innerHTML += row;
-                });
-
-            } else {
-
-                tableHead.innerHTML = `
+                        tableHead.innerHTML = `
         <th>ID</th>
         <th>Field</th>
         <th>Value</th>
@@ -351,74 +642,135 @@
         <th>Action</th>
         `;
 
-                if (!data || data.length === 0) {
-                    tableBody.innerHTML = "<tr><td colspan='7'>No Data Found</td></tr>";
-                    return;
+                        if (!data || data.length === 0) {
+                            tableBody.innerHTML = "<tr><td colspan='7'>No Data Found</td></tr>";
+                            return;
+                        }
+
+                        data.forEach(item => {
+
+                            let row = "<tr>";
+
+                            row += `<td>${item.id}</td>`;
+                            row += `<td>${item.fieldName}</td>`;
+                            row += `<td>${item.fieldValue}</td>`;
+                            row += `<td>${item.environment}</td>`;
+                            row += `<td>${item.country}</td>`;
+                            row += `<td>${item.tag || ""}</td>`;
+
+                            if (isPending) {
+                                row += `<td><button class="btn-approve" onclick="approveDelete(${item.id})">✅ Approve</button></td>`;
+                            } else {
+                                row += `<td><button class="btn-delete" onclick="requestDelete(${item.id})">🗑 Delete</button></td>`;
+                            }
+
+                            row += "</tr>";
+
+                            tableBody.innerHTML += row;
+                        });
+                    }
                 }
 
-                data.forEach(item => {
+                // ✅ DELETE
+                async function requestDelete(id) {
+                    await fetch(`${getBaseUrl()}/${id}`, { method: "DELETE" });
+                    setStatus("Delete requested");
+                    loadAll();
+                }
 
-                    let row = "<tr>";
+                // ✅ APPROVE DELETE
+                async function approveDelete(id) {
+                    await fetch(`${getBaseUrl()}/admin/${id}`, { method: "DELETE" });
+                    setStatus("Deleted");
+                    loadPending();
+                }
 
-                    row += `<td>${item.id}</td>`;
-                    row += `<td>${item.fieldName}</td>`;
-                    row += `<td>${item.fieldValue}</td>`;
-                    row += `<td>${item.environment}</td>`;
-                    row += `<td>${item.country}</td>`;
-                    row += `<td>${item.tag || ""}</td>`;
+                // ✅ INIT
+                loadAll();
 
-                    if (isPending) {
-                        row += `<td><button onclick="approveDelete(${item.id})">Approve</button></td>`;
-                    } else {
-                        row += `<td><button onclick="requestDelete(${item.id})">Delete</button></td>`;
+                // ✅ VALIDATION
+                function validateInputs() {
+                    return true;
+                }
+
+                // ✅ SWITCH MODULE (SIDEBAR)
+                function switchModule(moduleName, element) {
+
+                    CURRENT_MODULE = moduleName;
+
+                    document.querySelectorAll(".menu-item")
+                        .forEach(item => item.classList.remove("active"));
+
+                    element.classList.add("active");
+
+                    // ✅ Dynamic title update
+                    updatePageTitle(moduleName);
+
+                    loadAll();
+                }
+
+                // ✅ TOAST
+                function showToast(message, isError = false) {
+
+                    const toast = document.getElementById("toast");
+                    const msg = document.getElementById("toastMsg");
+
+                    msg.innerText = message;
+
+                    toast.className = "toast show " + (isError ? "error" : "success");
+
+                    setTimeout(() => {
+                        toast.className = "toast";
+                    }, 5000);
+                }
+
+                function closeToast() {
+                    document.getElementById("toast").className = "toast";
+                }
+
+                // ✅ LOADER
+                function showLoader() {
+                    document.getElementById("loader").style.display = "block";
+                }
+
+                function hideLoader() {
+                    document.getElementById("loader").style.display = "none";
+                }
+
+                function handleFilterChange() {
+                    loadAll();
+                }
+
+                // ✅ UPDATE PAGE TITLE
+                function updatePageTitle(moduleName, isAdmin = false) {
+
+                    const title = document.getElementById("pageTitle");
+
+                    if (isAdmin) {
+                        title.innerText = "👮 Admin - Pending Approval Data";
+                        return;
                     }
 
-                    row += "</tr>";
+                    // ✅ Capitalize first letter (for clean display)
+                    const formatted =
+                        moduleName.charAt(0).toUpperCase() +
+                        moduleName.slice(1);
 
-                    tableBody.innerHTML += row;
-                });
-            }
-        }
+                    title.innerText = `📄 Sample Test Data: ${formatted}`;
+                }
+            </script>
 
-        // ✅ DELETE
-        async function requestDelete(id) {
-            await fetch(`${getBaseUrl()}/${id}`, { method: "DELETE" });
-            setStatus("Delete requested");
-            loadAll();
-        }
+        </div>
+    </div>
 
-        // ✅ APPROVE DELETE
-        async function approveDelete(id) {
-            await fetch(`${getBaseUrl()}/admin/${id}`, { method: "DELETE" });
-            setStatus("Deleted");
-            loadPending();
-        }
+    <!-- ✅ TOAST -->
+    <div id="toast" class="toast">
+        <span id="toastMsg"></span>
+        <button onclick="closeToast()">✖</button>
+    </div>
 
-        // ✅ INIT
-        loadAll();
-
-        // ✅ VALIDATION
-        function validateInputs() {
-
-            //const field = document.getElementById("fieldName").value.trim();
-            const country = document.getElementById("country").value.trim();
-            const msg = document.getElementById("validationMsg");
-            const btn = document.getElementById("searchBtn");
-
-            msg.innerText = "";
-
-            if (!country) {
-                msg.innerText = "Please select a country";
-                btn.disabled = true;
-                return false;
-            }
-
-            btn.disabled = false;
-            return true;
-        }
-
-    </script>
-
+    <!-- ✅ LOADER -->
+    <div id="loader" class="loader"></div>
 </body>
 
 </html>
