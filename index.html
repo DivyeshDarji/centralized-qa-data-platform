@@ -463,6 +463,10 @@
 
             <script>
 
+                // ✅ GLOBAL STATE
+                let EDIT_MODE = false;
+                let EDIT_ID = null;
+
                 // ✅ MODULE
                 let CURRENT_MODULE = "testdata";
 
@@ -651,7 +655,9 @@
                             if (isPending) {
                                 row += `<td><button class="btn-approve" onclick="approveDelete(${item.id})">✅ Approve</button></td>`;
                             } else {
-                                row += `<td><button class="btn-delete" onclick="requestDelete(${item.id})">🗑 Delete</button></td>`;
+
+                                row += `<td><button class="btn-primary" onclick='editEndUser(${JSON.stringify(item)})'>✏ Edit</button>
+                                    <button class="btn-delete" onclick="requestDelete(${item.id})">🗑 Delete</button></td>`;
                             }
 
                             row += "</tr>";
@@ -795,7 +801,19 @@
 
                 // ✅ CLOSE FORM
                 function closeForm() {
+
                     document.getElementById("endUserForm").style.display = "none";
+
+                    EDIT_MODE = false;
+                    EDIT_ID = null;
+
+                    document.getElementById("eu_name").value = "";
+                    document.getElementById("eu_city").value = "";
+                    document.getElementById("eu_state").value = "";
+                    document.getElementById("eu_postal").value = "";
+                    document.getElementById("eu_email").value = "";
+                    document.getElementById("eu_phone").value = "";
+                    document.getElementById("eu_tag").value = "";
                 }
 
                 // ✅ SAVE END USER
@@ -813,17 +831,24 @@
                         environment: document.getElementById("globalEnv").value
                     };
 
+                    if (!payload.endUserName || !payload.tag) {
+                        setStatus("Name and Tag are required ❌", true);
+                        return;
+                    }
+
                     try {
 
-                        // ✅ Basic validation
-                        if (!payload.endUserName || !payload.tag) {
-                            setStatus("Name and Tag are required ❌", true);
-                            return;
+                        let url = "http://localhost:8080/enduser";
+                        let method = "POST";
+
+                        // ✅ SWITCH TO EDIT MODE
+                        if (EDIT_MODE) {
+                            url = `http://localhost:8080/enduser/${EDIT_ID}`;
+                            method = "PUT";
                         }
 
-                        // ✅ POST REQUEST TO BACKEND
-                        const res = await fetch("http://localhost:8080/enduser", {
-                            method: "POST",
+                        const res = await fetch(url, {
+                            method: method,
                             headers: {
                                 "Content-Type": "application/json"
                             },
@@ -836,14 +861,38 @@
                             return;
                         }
 
-                        setStatus("EndUser created successfully ✅");
+                        setStatus(EDIT_MODE ? "EndUser updated ✅" : "EndUser created ✅");
+
+                        // ✅ RESET
+                        EDIT_MODE = false;
+                        EDIT_ID = null;
 
                         closeForm();
                         loadAll();
 
                     } catch (err) {
-                        setStatus("Error creating EndUser", true);
+                        setStatus("Error saving data ❌", true);
                     }
+                }
+
+                // ✅ EDIT END USER (LOAD DATA INTO FORM)
+                function editEndUser(data) {
+
+                    openForm();
+
+                    EDIT_MODE = true;
+                    EDIT_ID = data.id;
+
+                    document.getElementById("eu_name").value = data.endUserName || "";
+                    document.getElementById("eu_city").value = data.city || "";
+                    document.getElementById("eu_state").value = data.state || "";
+                    document.getElementById("eu_postal").value = data.postalCode || "";
+                    document.getElementById("eu_country").value = data.country || "US";
+                    document.getElementById("eu_email").value = data.email || "";
+                    document.getElementById("eu_phone").value = data.phoneNumber || "";
+                    document.getElementById("eu_tag").value = data.tag || "";
+
+                    setStatus("Edit mode enabled ✏");
                 }
             </script>
 
