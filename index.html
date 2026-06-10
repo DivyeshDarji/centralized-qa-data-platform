@@ -4,6 +4,9 @@
 <head>
     <title>Data Platform</title>
 
+    <!-- ✅ FAVICON -->
+    <button class="btn-primary" onclick="openForm()">➕ Add EndUser</button>
+
     <style>
         body {
             font-family: "Segoe UI", Arial, sans-serif;
@@ -337,6 +340,32 @@
         }
     </style>
 </head>
+
+<!-- ✅ END USER FORM (HIDDEN BY DEFAULT) -->
+<div id="endUserForm" style="display:none; background:#f4f6f8; padding:15px; margin-bottom:15px; border-radius:8px;">
+
+    <h3>Add EndUser</h3>
+
+    <input id="eu_name" placeholder="EndUser Name">
+    <input id="eu_city" placeholder="City">
+    <input id="eu_state" placeholder="State (2-char)">
+    <input id="eu_postal" placeholder="Postal Code">
+
+    <select id="eu_country">
+        <option value="US">US</option>
+        <option value="IN">IN</option>
+        <option value="CA">CA</option>
+    </select>
+
+    <input id="eu_email" placeholder="Email">
+    <input id="eu_phone" placeholder="Phone">
+
+    <input id="eu_tag" placeholder="Tag">
+
+    <button class="btn-primary" onclick="saveEndUser()">💾 Save</button>
+    <button onclick="closeForm()">Cancel</button>
+
+</div>
 
 <body>
 
@@ -757,6 +786,64 @@
                         moduleName.slice(1);
 
                     title.innerText = `📄 Sample Test Data: ${formatted}`;
+                }
+
+                // ✅ END USER FORM
+                function openForm() {
+                    document.getElementById("endUserForm").style.display = "block";
+                }
+
+                // ✅ CLOSE FORM
+                function closeForm() {
+                    document.getElementById("endUserForm").style.display = "none";
+                }
+
+                // ✅ SAVE END USER
+                async function saveEndUser() {
+
+                    const payload = {
+                        endUserName: document.getElementById("eu_name").value,
+                        city: document.getElementById("eu_city").value,
+                        state: document.getElementById("eu_state").value,
+                        postalCode: document.getElementById("eu_postal").value,
+                        country: document.getElementById("eu_country").value,
+                        email: document.getElementById("eu_email").value,
+                        phoneNumber: document.getElementById("eu_phone").value,
+                        tag: document.getElementById("eu_tag").value,
+                        environment: document.getElementById("globalEnv").value
+                    };
+
+                    try {
+
+                        // ✅ Basic validation
+                        if (!payload.endUserName || !payload.tag) {
+                            setStatus("Name and Tag are required ❌", true);
+                            return;
+                        }
+
+                        // ✅ POST REQUEST TO BACKEND
+                        const res = await fetch("http://localhost:8080/enduser", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!res.ok) {
+                            const error = await res.text();
+                            setStatus(error, true);
+                            return;
+                        }
+
+                        setStatus("EndUser created successfully ✅");
+
+                        closeForm();
+                        loadAll();
+
+                    } catch (err) {
+                        setStatus("Error creating EndUser", true);
+                    }
                 }
             </script>
 
