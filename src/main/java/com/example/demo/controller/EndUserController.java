@@ -111,10 +111,35 @@ public class EndUserController {
                 return ResponseEntity.badRequest().body("Data not found");
             }
 
-            // ✅ KEEP ID SAME
-            data.setId(id);
+            // ✅ UPDATE ONLY PROVIDED FIELDS
+            if (data.getEndUserName() != null)
+                existing.setEndUserName(data.getEndUserName());
 
-            return ResponseEntity.ok(service.save(data));
+            if (data.getCity() != null)
+                existing.setCity(data.getCity());
+
+            if (data.getState() != null)
+                existing.setState(data.getState());
+
+            if (data.getPostalCode() != null)
+                existing.setPostalCode(data.getPostalCode());
+
+            if (data.getCountry() != null)
+                existing.setCountry(data.getCountry());
+
+            if (data.getEmail() != null)
+                existing.setEmail(data.getEmail());
+
+            if (data.getPhoneNumber() != null)
+                existing.setPhoneNumber(data.getPhoneNumber());
+
+            if (data.getTag() != null)
+                existing.setTag(data.getTag());
+
+            // ✅ important fields
+            existing.setEnvironment(data.getEnvironment());
+
+            return ResponseEntity.ok(service.save(existing));
 
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

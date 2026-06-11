@@ -22,16 +22,20 @@ public class EndUserService {
     }
 
     public EndUser save(EndUser data) {
+
         if (data.getDeleteStatus() == null) {
             data.setDeleteStatus("NONE");
         }
 
-        List<EndUser> existing = repository.findByTagAndEnvironment(
-                data.getTag(),
-                data.getEnvironment());
+        List<EndUser> existing = repository.findByTagAndEnvironment(data.getTag(), data.getEnvironment());
 
-        if (!existing.isEmpty()) {
-            throw new RuntimeException("Duplicate tag found for environment: " + data.getTag());
+        for (EndUser e : existing) {
+
+            // ✅ Ignore SAME record (important)
+            if (!e.getId().equals(data.getId())) {
+                throw new RuntimeException(
+                        "Duplicate tag found for environment: " + data.getEnvironment());
+            }
         }
 
         return repository.save(data);
