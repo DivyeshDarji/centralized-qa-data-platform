@@ -2,6 +2,8 @@ package com.example.demo.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -34,4 +36,11 @@ public interface TestDataRepository extends JpaRepository<TestData, Long> {
     // ✅ Custom method for filtering later - FieldName only
     List<TestData> findByFieldValue(String fieldValue);
 
+    // ✅ Custom method for filtering paged results - EnvironmentAndCountry with
+    // deleteStatus not PENDING
+    Page<TestData> findByEnvironmentAndCountryAndDeleteStatusNot(
+            String environment,
+            String country,
+            String deleteStatus,
+            Pageable pageable);
 }

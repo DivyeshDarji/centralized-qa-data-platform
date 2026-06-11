@@ -42,23 +42,27 @@ public class EndUserController {
      */
 
     @GetMapping("/search")
-    public List<EndUser> search(
+    public ResponseEntity<?> search(
             @RequestParam(required = false) String environment,
-            @RequestParam(required = false) String country) {
+            @RequestParam(required = false) String country,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
 
-        if (environment != null && country != null) {
-            return service.filter(environment, country);
+        try {
+
+            // ✅ Pagination flow
+            if (page != null && size != null) {
+                return ResponseEntity.ok(
+                        service.search(environment, country, page, size));
+            }
+
+            // ✅ Non-pagination fallback
+            return ResponseEntity.ok(
+                    service.filter(environment, country));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-        if (environment != null) {
-            return service.findByEnvironment(environment);
-        }
-
-        if (country != null) {
-            return service.findByCountry(country);
-        }
-
-        return service.getAll();
     }
 
     @GetMapping("/pending")

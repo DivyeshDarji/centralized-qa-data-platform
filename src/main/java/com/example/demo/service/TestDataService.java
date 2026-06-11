@@ -3,6 +3,9 @@ package com.example.demo.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.model.TestData;
@@ -83,7 +86,31 @@ public class TestDataService {
 
     // ✅ Filter (important for your requirement)
     public List<TestData> filter(String env, String country) {
-        return removePending(repository.findByEnvironmentAndCountry(env, country));
+        if (env != null && country != null) {
+            return removePending(repository.findByEnvironmentAndCountry(env, country));
+        }
+
+        if (env != null) {
+            return removePending(repository.findByEnvironment(env));
+        }
+
+        if (country != null) {
+            return removePending(repository.findByCountry(country));
+        }
+
+        return removePending(repository.findAll());
+    }
+
+    // ✅ Search with pagination (important for your requirement)
+    public Page<TestData> search(String env, String country, int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        return repository.findByEnvironmentAndCountryAndDeleteStatusNot(
+                env,
+                country,
+                "PENDING",
+                pageable);
     }
 
     // ✅ Search by fieldName + environment

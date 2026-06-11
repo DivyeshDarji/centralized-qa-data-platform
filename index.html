@@ -462,6 +462,7 @@
                         </thead>
                         <tbody id="tableBody"></tbody>
                     </table>
+                    <div id="pagination" style="margin-top:10px;"></div>
                 </div>
 
             </div>
@@ -469,6 +470,10 @@
 
 
             <script>
+
+                // ✅ ADD PAGINATION VARIABLES
+                let CURRENT_PAGE = 0;
+                let PAGE_SIZE = 5;
 
                 // ✅ GLOBAL STATE
                 let EDIT_MODE = false;
@@ -513,7 +518,10 @@
                         let env = document.getElementById("globalEnv").value;
                         let country = document.getElementById("country").value;
 
-                        const res = await fetch(getBaseUrl() + `/search?environment=${env}&country=${country}`);
+                        let url = getBaseUrl() +
+                            `/search?environment=${env}&country=${country}&page=${CURRENT_PAGE}&size=${PAGE_SIZE}`
+
+                        const res = await fetch(url);
 
                         // ✅ CHECK RESPONSE
                         if (!res.ok) {
@@ -524,7 +532,9 @@
 
                         const data = await res.json();
 
-                        displayData(data);
+                        displayData(data.content);
+
+                        renderPagination(data.totalPages);
 
                         setStatus("Loaded successfully");
 
@@ -780,6 +790,7 @@
                 }
 
                 function handleFilterChange() {
+                    CURRENT_PAGE = 0;
                     loadAll();
                 }
 
@@ -901,6 +912,30 @@
 
                     setStatus("Edit mode enabled ✏");
                 }
+
+                // ✅ RENDER PAGINATION
+                function renderPagination(totalPages) {
+
+                    const container = document.getElementById("pagination");
+                    container.innerHTML = "";
+
+                    for (let i = 0; i < totalPages; i++) {
+
+                        container.innerHTML += `
+            <button class="btn-primary"
+                onclick="goToPage(${i})">
+                ${i + 1}
+            </button>
+        `;
+                    }
+                }
+
+                // ADD PAGE NAVIGATION FUNCTION
+                function goToPage(page) {
+                    CURRENT_PAGE = page;
+                    loadAll();
+                }
+
             </script>
 
         </div>
