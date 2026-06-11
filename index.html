@@ -7,6 +7,13 @@
     <!-- ✅ FAVICON -->
     <button class="btn-primary" onclick="openForm()">➕ Add EndUser</button>
 
+    <!-- ✅ ROLE SWITCHER (FOR SIMULATION PURPOSES) -->
+    <label>Role:</label>
+    <select id="userRole" onchange="changeRole(this.value)">
+        <option value="ADMIN">ADMIN</option>
+        <option value="QA">QA</option>
+    </select>
+
     <style>
         body {
             font-family: "Segoe UI", Arial, sans-serif;
@@ -468,6 +475,9 @@
 
             <script>
 
+                // ✅ USER ROLE (SIMULATION)
+                let USER_ROLE = "ADMIN"; // change to "QA" for testing
+
                 // ✅ ADD PAGINATION VARIABLES
                 let CURRENT_PAGE = 0;
                 let PAGE_SIZE = 5;
@@ -586,6 +596,13 @@
                 // ✅ PENDING
                 async function loadPending() {
                     try {
+
+                        // ✅ CHECK ROLE
+                        if (USER_ROLE !== "ADMIN") {
+                            setStatus("Access Denied ❌", true);
+                            return;
+                        }
+
                         showLoader();
 
                         const res = await fetch(getBaseUrl() + "/pending");
@@ -671,7 +688,7 @@
                             } else {
 
                                 row += `<td><button class="btn-primary" onclick='editEndUser(${JSON.stringify(item)})'>✏ Edit</button>
-                                    <button class="btn-delete" onclick="requestDelete(${item.id})">🗑 Delete</button></td>`;
+                                <button class="btn-delete" onclick="requestDelete(${item.id})">🗑 Delete</button>`;
                             }
 
                             row += "</tr>";
@@ -729,6 +746,13 @@
 
                 // ✅ APPROVE DELETE
                 async function approveDelete(id) {
+
+                    // ✅ CHECK ROLE
+                    if (USER_ROLE !== "ADMIN") {
+                        setStatus("Access Denied ❌", true);
+                        return;
+                    }
+
                     await fetch(`${getBaseUrl()}/admin/${id}`, { method: "DELETE" });
                     setStatus("Deleted");
                     loadPending();
@@ -930,6 +954,15 @@
                 // ADD PAGE NAVIGATION FUNCTION
                 function goToPage(page) {
                     CURRENT_PAGE = page;
+                    loadAll();
+                }
+
+                // ✅ CHANGE ROLE (FOR SIMULATION)
+                function changeRole(role) {
+                    USER_ROLE = role;
+                    document.querySelector(".btn-admin").style.display =
+                        USER_ROLE === "ADMIN" ? "inline-block" : "none";
+                    setStatus("Role changed to " + role);
                     loadAll();
                 }
 
