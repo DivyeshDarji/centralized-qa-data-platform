@@ -4,6 +4,16 @@
 <head>
     <title>Data Platform</title>
 
+    <!-- ✅ FAVICON -->
+    <button class="btn-primary" onclick="openForm()">➕ Add EndUser</button>
+
+    <!-- ✅ ROLE SWITCHER (FOR SIMULATION PURPOSES) -->
+    <label>Role:</label>
+    <select id="userRole" onchange="changeRole(this.value)">
+        <option value="ADMIN">ADMIN</option>
+        <option value="QA">QA</option>
+    </select>
+
     <style>
         body {
             font-family: "Segoe UI", Arial, sans-serif;
@@ -338,6 +348,39 @@
     </style>
 </head>
 
+<!-- ✅ END USER FORM (HIDDEN BY DEFAULT) -->
+<div id="endUserForm" style="display:none; background:#f4f6f8; padding:15px; margin-bottom:15px; border-radius:8px;">
+
+    <h3>Add EndUser</h3>
+
+    <input id="eu_name" placeholder="EndUser Name">
+    <input id="eu_city" placeholder="City">
+    <input id="eu_state" placeholder="State (2-char)">
+    <input id="eu_postal" placeholder="Postal Code">
+
+    <select id="eu_country">
+        <option value="US">US</option>
+        <option value="IN">IN</option>
+        <option value="CA">CA</option>
+        <option value="MX">MX</option>
+        <option value="DE">DE</option>
+        <option value="FR">FR</option>
+        <option value="IT">IT</option>
+        <option value="AU">AU</option>
+        <option value="ES">ES</option>
+        <option value="UK">UK</option>
+    </select>
+
+    <input id="eu_email" placeholder="Email">
+    <input id="eu_phone" placeholder="Phone">
+
+    <input id="eu_tag" placeholder="Tag">
+
+    <button class="btn-primary" onclick="saveEndUser()">💾 Save</button>
+    <button onclick="closeForm()">Cancel</button>
+
+</div>
+
 <body>
 
     <!-- ✅ HEADER -->
@@ -427,12 +470,21 @@
                         <tbody id="tableBody"></tbody>
                     </table>
                 </div>
-
+                <div id="pagination" style="margin-top:10px;"></div>
             </div>
 
-
-
             <script>
+
+                // ✅ USER ROLE (SIMULATION)
+                let USER_ROLE = "ADMIN"; // change to "QA" for testing
+
+                // ✅ ADD PAGINATION VARIABLES
+                let CURRENT_PAGE = 0;
+                let PAGE_SIZE = 5;
+
+                // ✅ GLOBAL STATE
+                let EDIT_MODE = false;
+                let EDIT_ID = null;
 
                 // ✅ MODULE
                 let CURRENT_MODULE = "testdata";
@@ -473,7 +525,10 @@
                         let env = document.getElementById("globalEnv").value;
                         let country = document.getElementById("country").value;
 
-                        const res = await fetch(getBaseUrl() + `/search?environment=${env}&country=${country}`);
+                        let url = getBaseUrl() +
+                            `/search?environment=${env}&country=${country}&page=${CURRENT_PAGE}&size=${PAGE_SIZE}`
+
+                        const res = await fetch(url);
 
                         // ✅ CHECK RESPONSE
                         if (!res.ok) {
@@ -484,7 +539,9 @@
 
                         const data = await res.json();
 
-                        displayData(data);
+                        displayData(data.content);
+
+                        renderPagination(data.totalPages);
 
                         setStatus("Loaded successfully");
 
@@ -539,6 +596,13 @@
                 // ✅ PENDING
                 async function loadPending() {
                     try {
+
+                        // ✅ CHECK ROLE
+                        if (USER_ROLE !== "ADMIN") {
+                            setStatus("Access Denied ❌", true);
+                            return;
+                        }
+
                         showLoader();
 
                         const res = await fetch(getBaseUrl() + "/pending");
@@ -580,16 +644,16 @@
         <th>EndUser Name</th>
         <th>Env</th>
         <th>Country</th>
-        <th>Address Line 1</th>
-        <th>Address Line 2</th>
-        <th>Address Line 3</th>
+        <th>Add Line 1</th>
+        <th>Add Line 2</th>
+        <th>Add Line 3</th>
         <th>City</th>
         <th>State</th>
         <th>Postal Code</th>
         <th>Market Segment</th>
-        <th>Contact</th>
-        <th>Email</th>
-        <th>Phone</th>
+        <th>Contact Name</th>
+        <th>Email ID</th>
+        <th>Phone Number</th>
         <th>Tag</th>
         <th>Action</th>
         `;
@@ -622,7 +686,9 @@
                             if (isPending) {
                                 row += `<td><button class="btn-approve" onclick="approveDelete(${item.id})">✅ Approve</button></td>`;
                             } else {
-                                row += `<td><button class="btn-delete" onclick="requestDelete(${item.id})">🗑 Delete</button></td>`;
+
+                                row += `<td><button class="btn-primary" onclick='editEndUser(${JSON.stringify(item)})'>✏ Edit</button>
+                                <button class="btn-delete" onclick="requestDelete(${item.id})">🗑 Delete</button>`;
                             }
 
                             row += "</tr>";
@@ -680,6 +746,13 @@
 
                 // ✅ APPROVE DELETE
                 async function approveDelete(id) {
+
+                    // ✅ CHECK ROLE
+                    if (USER_ROLE !== "ADMIN") {
+                        setStatus("Access Denied ❌", true);
+                        return;
+                    }
+
                     await fetch(`${getBaseUrl()}/admin/${id}`, { method: "DELETE" });
                     setStatus("Deleted");
                     loadPending();
@@ -738,6 +811,7 @@
                 }
 
                 function handleFilterChange() {
+                    CURRENT_PAGE = 0;
                     loadAll();
                 }
 
@@ -758,6 +832,140 @@
 
                     title.innerText = `📄 Sample Test Data: ${formatted}`;
                 }
+
+                // ✅ END USER FORM
+                function openForm() {
+                    document.getElementById("endUserForm").style.display = "block";
+                }
+
+                // ✅ CLOSE FORM
+                function closeForm() {
+
+                    document.getElementById("endUserForm").style.display = "none";
+
+                    EDIT_MODE = false;
+                    EDIT_ID = null;
+
+                    document.getElementById("eu_name").value = "";
+                    document.getElementById("eu_city").value = "";
+                    document.getElementById("eu_state").value = "";
+                    document.getElementById("eu_postal").value = "";
+                    document.getElementById("eu_email").value = "";
+                    document.getElementById("eu_phone").value = "";
+                    document.getElementById("eu_tag").value = "";
+                }
+
+                // ✅ SAVE END USER
+                async function saveEndUser() {
+
+                    const payload = {
+                        endUserName: document.getElementById("eu_name").value,
+                        city: document.getElementById("eu_city").value,
+                        state: document.getElementById("eu_state").value,
+                        postalCode: document.getElementById("eu_postal").value,
+                        country: document.getElementById("eu_country").value,
+                        email: document.getElementById("eu_email").value,
+                        phoneNumber: document.getElementById("eu_phone").value,
+                        tag: document.getElementById("eu_tag").value,
+                        environment: document.getElementById("globalEnv").value
+                    };
+
+                    if (!payload.endUserName || !payload.tag) {
+                        setStatus("Name and Tag are required ❌", true);
+                        return;
+                    }
+
+                    try {
+
+                        let url = "http://localhost:8080/enduser";
+                        let method = "POST";
+
+                        // ✅ SWITCH TO EDIT MODE
+                        if (EDIT_MODE) {
+                            url = `http://localhost:8080/enduser/${EDIT_ID}`;
+                            method = "PUT";
+                        }
+
+                        const res = await fetch(url, {
+                            method: method,
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!res.ok) {
+                            const error = await res.text();
+                            setStatus(error, true);
+                            return;
+                        }
+
+                        setStatus(EDIT_MODE ? "EndUser updated ✅" : "EndUser created ✅");
+
+                        // ✅ RESET
+                        EDIT_MODE = false;
+                        EDIT_ID = null;
+
+                        closeForm();
+                        loadAll();
+
+                    } catch (err) {
+                        setStatus("Error saving data ❌", true);
+                    }
+                }
+
+                // ✅ EDIT END USER (LOAD DATA INTO FORM)
+                function editEndUser(data) {
+
+                    openForm();
+
+                    EDIT_MODE = true;
+                    EDIT_ID = data.id;
+
+                    document.getElementById("eu_name").value = data.endUserName || "";
+                    document.getElementById("eu_city").value = data.city || "";
+                    document.getElementById("eu_state").value = data.state || "";
+                    document.getElementById("eu_postal").value = data.postalCode || "";
+                    document.getElementById("eu_country").value = data.country || "US";
+                    document.getElementById("eu_email").value = data.email || "";
+                    document.getElementById("eu_phone").value = data.phoneNumber || "";
+                    document.getElementById("eu_tag").value = data.tag || "";
+
+                    setStatus("Edit mode enabled ✏");
+                }
+
+                // ✅ RENDER PAGINATION
+                function renderPagination(totalPages) {
+
+                    const container = document.getElementById("pagination");
+                    container.innerHTML = "";
+
+                    for (let i = 0; i < totalPages; i++) {
+
+                        container.innerHTML += `
+            <button class="btn-primary"
+                onclick="goToPage(${i})">
+                ${i + 1}
+            </button>
+        `;
+                    }
+                }
+
+                // ADD PAGE NAVIGATION FUNCTION
+                function goToPage(page) {
+                    CURRENT_PAGE = page;
+                    loadAll();
+                }
+
+                // ✅ CHANGE ROLE (FOR SIMULATION)
+                function changeRole(role) {
+                    USER_ROLE = role;
+                    document.querySelector(".btn-admin").style.display =
+                        USER_ROLE === "ADMIN" ? "inline-block" : "none";
+                    setStatus("Role changed to " + role);
+                    loadAll();
+                }
+
             </script>
 
         </div>

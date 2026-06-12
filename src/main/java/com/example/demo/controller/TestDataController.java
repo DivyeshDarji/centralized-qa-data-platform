@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -129,7 +130,7 @@ public class TestDataController {
         }
     }
 
-    // ✅ Search API with multiple parameters (fieldName, environment, country)
+    /* // ✅ Search API with multiple parameters (fieldName, environment, country)
     @GetMapping("/search")
     public List<TestData> search(
             @RequestParam(required = false) String fieldName,
@@ -162,7 +163,31 @@ public class TestDataController {
         }
 
         return service.getAll();
-    }
+    } */
+
+    @GetMapping("/search")
+    public ResponseEntity<?> search(
+            @RequestParam(required = false) String environment,
+            @RequestParam(required = false) String country,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
+
+        try {
+
+            // ✅ Pagination flow
+            if (page != null && size != null) {
+                return ResponseEntity.ok(
+                        service.search(environment, country, page, size));
+            }
+
+            // ✅ Non-pagination fallback
+            return ResponseEntity.ok(
+                    service.filter(environment, country));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }    
 
     // ✅ Search using tag (BEST USE CASE)
     @GetMapping("/searchByTag")

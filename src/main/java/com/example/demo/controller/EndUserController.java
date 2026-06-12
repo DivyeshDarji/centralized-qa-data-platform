@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -41,23 +42,27 @@ public class EndUserController {
      */
 
     @GetMapping("/search")
-    public List<EndUser> search(
+    public ResponseEntity<?> search(
             @RequestParam(required = false) String environment,
-            @RequestParam(required = false) String country) {
+            @RequestParam(required = false) String country,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
 
-        if (environment != null && country != null) {
-            return service.filter(environment, country);
+        try {
+
+            // ✅ Pagination flow
+            if (page != null && size != null) {
+                return ResponseEntity.ok(
+                        service.search(environment, country, page, size));
+            }
+
+            // ✅ Non-pagination fallback
+            return ResponseEntity.ok(
+                    service.filter(environment, country));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-        if (environment != null) {
-            return service.findByEnvironment(environment);
-        }
-
-        if (country != null) {
-            return service.findByCountry(country);
-        }
-
-        return service.getAll();
     }
 
     @GetMapping("/pending")
@@ -100,4 +105,48 @@ public class EndUserController {
         }
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody EndUser data) {
+
+        try {
+            EndUser existing = service.getById(id);
+
+            if (existing == null) {
+                return ResponseEntity.badRequest().body("Data not found");
+            }
+
+            // ✅ UPDATE ONLY PROVIDED FIELDS
+            if (data.getEndUserName() != null)
+                existing.setEndUserName(data.getEndUserName());
+
+            if (data.getCity() != null)
+                existing.setCity(data.getCity());
+
+            if (data.getState() != null)
+                existing.setState(data.getState());
+
+            if (data.getPostalCode() != null)
+                existing.setPostalCode(data.getPostalCode());
+
+            if (data.getCountry() != null)
+                existing.setCountry(data.getCountry());
+
+            if (data.getEmail() != null)
+                existing.setEmail(data.getEmail());
+
+            if (data.getPhoneNumber() != null)
+                existing.setPhoneNumber(data.getPhoneNumber());
+
+            if (data.getTag() != null)
+                existing.setTag(data.getTag());
+
+            // ✅ important fields
+            existing.setEnvironment(data.getEnvironment());
+
+            return ResponseEntity.ok(service.save(existing));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
