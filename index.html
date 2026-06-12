@@ -877,12 +877,12 @@
 
                     try {
 
-                        let url = "http://localhost:8080/enduser";
+                        let url = getBaseUrl();
                         let method = "POST";
 
                         // ✅ SWITCH TO EDIT MODE
                         if (EDIT_MODE) {
-                            url = `http://localhost:8080/enduser/${EDIT_ID}`;
+                            url = `${getBaseUrl()}/enduser/${EDIT_ID}`;
                             method = "PUT";
                         }
 
