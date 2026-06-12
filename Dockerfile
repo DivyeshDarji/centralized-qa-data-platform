@@ -17,4 +17,4 @@ RUN ./mvnw clean package -DskipTests
 RUN mv target/*.jar app.jar
 
 # Run the app
-CMD ["java", "-jar", "target/*.jar"]
+CMD ["java", "-jar", "app.jar"]
