@@ -13,5 +13,8 @@ RUN chmod +x mvnw
 # Build the project
 RUN ./mvnw clean package -DskipTests
 
+# Rename jar for consistency
+RUN mv target/*.jar app.jar
+
 # Run the app
 CMD ["java", "-jar", "target/*.jar"]
